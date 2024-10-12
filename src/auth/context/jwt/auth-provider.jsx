@@ -19,23 +19,37 @@ export function AuthProvider({ children }) {
   const checkUserSession = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
-
+  
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
-
-        const res = await axios.get(endpoints.auth.me);
-
-        const { user } = res.data;
-
-        setState({ user: { ...user, accessToken }, loading: false });
+  
+        // Correct method to retrieve username from localStorage
+        const username = localStorage.getItem('username');
+  
+        if (username) {
+          // Make API call with username and accessToken
+          const res = await axios.get(`${endpoints.auth.me}${username}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Pass the token in the Authorization header
+            },
+          });
+  
+          const { user } = res.data;
+  
+          setState({ user: { ...user, accessToken }, loading: false });
+        } else {
+          console.error("Username not found in localStorage");
+          setState({ user: null, loading: false });
+        }
       } else {
         setState({ user: null, loading: false });
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error during API call:", error);
       setState({ user: null, loading: false });
     }
   }, [setState]);
+  
 
   useEffect(() => {
     checkUserSession();

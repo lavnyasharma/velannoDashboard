@@ -26,10 +26,9 @@ import { signInWithPassword } from '../../context/jwt';
 // ----------------------------------------------------------------------
 
 export const SignInSchema = zod.object({
-  email: zod
+  username: zod
     .string()
-    .min(1, { message: 'Email is required!' })
-    .email({ message: 'Email must be a valid email address!' }),
+    .min(1, { message: 'Username is required!' }),
   password: zod
     .string()
     .min(1, { message: 'Password is required!' })
@@ -48,8 +47,8 @@ export function JwtSignInView() {
   const password = useBoolean();
 
   const defaultValues = {
-    email: 'demo@minimals.cc',
-    password: '@demo1',
+    username: 'architprasar',
+    password: '26@Prasar',
   };
 
   const methods = useForm({
@@ -63,8 +62,10 @@ export function JwtSignInView() {
   } = methods;
 
   const onSubmit = handleSubmit(async (data) => {
+
+    console.log(data)
     try {
-      await signInWithPassword({ email: data.email, password: data.password });
+      await signInWithPassword({ username: data.username, password: data.password });
       await checkUserSession?.();
 
       router.refresh();
@@ -76,7 +77,7 @@ export function JwtSignInView() {
 
   const renderForm = (
     <Box gap={3} display="flex" flexDirection="column">
-      <Field.Text name="email" label="Email address" InputLabelProps={{ shrink: true }} />
+      <Field.Text name="username" label="User Name" InputLabelProps={{ shrink: true }} />
 
       <Box gap={1.5} display="flex" flexDirection="column">
         <Link
@@ -135,8 +136,6 @@ export function JwtSignInView() {
         }
         sx={{ textAlign: { xs: 'center', md: 'left' } }}
       />
-
-      
 
       {!!errorMsg && (
         <Alert severity="error" sx={{ mb: 3 }}>

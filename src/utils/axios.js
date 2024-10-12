@@ -35,8 +35,8 @@ export const endpoints = {
   kanban: '/api/kanban',
   calendar: '/api/calendar',
   auth: {
-    me: '/api/auth/me',
-    signIn: '/api/auth/sign-in',
+    me: 'https://api.velonna.co/user/',
+    signIn: 'https://api.velonna.co/login/',
     signUp: '/api/auth/sign-up',
   },
   mail: {

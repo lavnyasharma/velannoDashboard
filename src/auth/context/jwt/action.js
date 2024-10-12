@@ -6,13 +6,16 @@ import { STORAGE_KEY } from './constant';
 /** **************************************
  * Sign in
  *************************************** */
-export const signInWithPassword = async ({ email, password }) => {
+export const signInWithPassword = async ({ username, password }) => {
   try {
-    const params = { email, password };
+    const params = { username, password };
+    localStorage.setItem("username",username)
 
     const res = await axios.post(endpoints.auth.signIn, params);
+    console.log(res.data.access)
 
-    const { accessToken } = res.data;
+
+    const  accessToken  = res.data.access;
 
     if (!accessToken) {
       throw new Error('Access token not found in response');
@@ -28,9 +31,9 @@ export const signInWithPassword = async ({ email, password }) => {
 /** **************************************
  * Sign up
  *************************************** */
-export const signUp = async ({ email, password, firstName, lastName }) => {
+export const signUp = async ({ username, password, firstName, lastName }) => {
   const params = {
-    email,
+    username,
     password,
     firstName,
     lastName,
