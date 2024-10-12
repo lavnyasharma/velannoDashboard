@@ -52,7 +52,7 @@ export function InvoiceDetails({ invoice }) {
         </TableCell>
         <TableCell width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          {fCurrency(invoice?.subtotal)}
+          Rs {(invoice?.subtotal)}
         </TableCell>
       </StyledTableRow>
 
@@ -60,7 +60,7 @@ export function InvoiceDetails({ invoice }) {
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Shipping</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          - {fCurrency(invoice?.shipping)}
+          -  {(invoice?.shipping)}
         </TableCell>
       </StyledTableRow>
 
@@ -68,21 +68,21 @@ export function InvoiceDetails({ invoice }) {
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Discount</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          - {fCurrency(invoice?.discount)}
+          -  {(invoice?.discount)}
         </TableCell>
       </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Taxes</TableCell>
-        <TableCell width={120}>{fCurrency(invoice?.taxes)}</TableCell>
+        <TableCell width={120}>Rs {(invoice?.taxes)}</TableCell>
       </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {fCurrency(invoice?.totalAmount)}
+          Rs {(invoice?.totalAmount)}
         </TableCell>
       </StyledTableRow>
     </>
@@ -140,9 +140,9 @@ export function InvoiceDetails({ invoice }) {
 
               <TableCell>{row.product.quantity}</TableCell>
 
-              <TableCell align="right">{fCurrency(row.product.price)}</TableCell>
+              <TableCell align="right">Rs {(row.product.price)}</TableCell>
 
-              <TableCell align="right">{fCurrency(row.product.price * row.product.quantity)}</TableCell>
+              <TableCell align="right">Rs{(row.product.price * row.product.quantity)}</TableCell>
             </TableRow>
           ))}
 

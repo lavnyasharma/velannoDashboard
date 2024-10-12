@@ -174,7 +174,7 @@ function PlanCard({ plan, sx, ...other }) {
 
         <m.div variants={varFade({ distance: 24 }).inLeft}>
           <Box component="span" sx={{ typography: 'h3' }}>
-            ${plan.price}
+            Rs {plan.price}
           </Box>
         </m.div>
       </Stack>
