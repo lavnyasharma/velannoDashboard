@@ -20,6 +20,7 @@ export const paths = {
   comingSoon: '/coming-soon',
   maintenance: '/maintenance',
   pricing: '/pricing',
+  search:'/search',
   payment: '/payment',
   about: '/about-us',
   contact: '/contact-us',
@@ -158,6 +159,12 @@ export const paths = {
       demo: {
         details: `${ROOTS.DASHBOARD}/order/${MOCK_ID}`,
       },
+    },
+    search: {
+      root: `${ROOTS.DASHBOARD}/hsnSearch`,
+    },
+    orderinvoice: {
+      root: `${ROOTS.DASHBOARD}/invoice`,
     },
     job: {
       root: `${ROOTS.DASHBOARD}/job`,

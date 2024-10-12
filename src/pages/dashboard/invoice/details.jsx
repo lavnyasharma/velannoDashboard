@@ -6,6 +6,8 @@ import { CONFIG } from 'src/config-global';
 import { _invoices } from 'src/_mock/_invoice';
 
 import { InvoiceDetailsView } from 'src/sections/invoice/view';
+import { useEffect, useState } from 'react';
+import axiosInstance from 'src/utils/axios';
 
 // ----------------------------------------------------------------------
 
@@ -13,8 +15,18 @@ const metadata = { title: `Invoice details | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   const { id = '' } = useParams();
-
-  const currentInvoice = _invoices.find((invoice) => invoice.id === id);
+  const getCartData = async () => {
+    const resp = await axiosInstance.get('https://api.velonna.co/cart/').then((res) => {
+      console.log(res.data.results);
+      setCart(res.data.results);
+    });
+  };
+  const [cart,setCart] = useState([])
+  useEffect(()=>{
+    if (cart.length===0){
+      getCartData()
+    }
+  })
 
   return (
     <>
@@ -22,7 +34,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <InvoiceDetailsView invoice={currentInvoice} />
+    {cart.length===0?"Genratign invoice":  <InvoiceDetailsView invoice={cart} />}
     </>
   );
 }

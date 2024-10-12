@@ -20,13 +20,12 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 import { Iconify } from 'src/components/iconify';
 
-import { InvoicePDF } from './invoice-pdf';
+import { InvoicePDF } from '../invoice';
 
 // ----------------------------------------------------------------------
 
 export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus }) {
   const router = useRouter();
-  console.log(invoice)
 
   const view = useBoolean();
 
@@ -38,7 +37,7 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
     <NoSsr>
       <PDFDownloadLink
         document={
-          invoice ? <InvoicePDF invoice={invoice}  /> : <span />
+          invoice ? <InvoicePDF invoice={invoice} currentStatus={currentStatus} /> : <span />
         }
         fileName={invoice?.invoiceNumber}
         style={{ textDecoration: 'none' }}
@@ -67,17 +66,17 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
         sx={{ mb: { xs: 3, md: 5 } }}
       >
         <Stack direction="row" spacing={1} flexGrow={1} sx={{ width: 1 }}>
-          {/* <Tooltip title="Edit">
+          <Tooltip title="Edit">
             <IconButton onClick={handleEdit}>
               <Iconify icon="solar:pen-bold" />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
 
-          {/* <Tooltip title="View">
+          <Tooltip title="View">
             <IconButton onClick={view.onTrue}>
               <Iconify icon="solar:eye-bold" />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
 
           {renderDownload}
 
@@ -87,17 +86,17 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
             </IconButton>
           </Tooltip>
 
-          {/* <Tooltip title="Send">
+          <Tooltip title="Send">
             <IconButton>
               <Iconify icon="iconamoon:send-fill" />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
 
-          {/* <Tooltip title="Share">
+          <Tooltip title="Share">
             <IconButton>
               <Iconify icon="solar:share-bold" />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
         </Stack>
 
         <TextField

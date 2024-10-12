@@ -84,7 +84,6 @@ export function InvoicePDF({ invoice, currentStatus }) {
     invoiceFrom,
     invoiceNumber,
   } = invoice;
-  console.log(items)
 
   const styles = useStyles();
 
@@ -117,21 +116,17 @@ export function InvoicePDF({ invoice, currentStatus }) {
   const renderInfo = (
     <View style={[styles.container, styles.mb40]}>
       <View style={{ width: '50%' }}>
-   
-              Invoice from
-            Velonna.co
-            <br />
-            info@velonnna.co
-            <br />
-            contact: contact@velonna.co
-            <br />
+        <Text style={[styles.subtitle2, styles.mb4]}>Invoice from</Text>
+        <Text style={styles.body2}>{invoiceFrom.name}</Text>
+        <Text style={styles.body2}>{invoiceFrom.fullAddress}</Text>
+        <Text style={styles.body2}>{invoiceFrom.phoneNumber}</Text>
       </View>
 
       <View style={{ width: '50%' }}>
-        {/* <Text style={[styles.subtitle2, styles.mb4]}>Invoice to</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>Invoice to</Text>
         <Text style={styles.body2}>{invoiceTo.name}</Text>
         <Text style={styles.body2}>{invoiceTo.fullAddress}</Text>
-        <Text style={styles.body2}>{invoiceTo.phoneNumber}</Text> */}
+        <Text style={styles.body2}>{invoiceTo.phoneNumber}</Text>
       </View>
     </View>
   );
@@ -160,7 +155,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
               <Text style={styles.subtitle2}>#</Text>
             </View>
             <View style={styles.cell_2}>
-              <Text style={styles.subtitle2}>gross_weight</Text>
+              <Text style={styles.subtitle2}>Description</Text>
             </View>
             <View style={styles.cell_3}>
               <Text style={styles.subtitle2}>Qty</Text>
@@ -181,25 +176,25 @@ export function InvoicePDF({ invoice, currentStatus }) {
                 <Text>{index + 1}</Text>
               </View>
               <View style={styles.cell_2}>
-                <Text style={styles.subtitle2}>{item.product.title}</Text>
-                <Text>{item.product.gross_weight}</Text>
+                <Text style={styles.subtitle2}>{item.title}</Text>
+                <Text>{item.description}</Text>
               </View>
               <View style={styles.cell_3}>
-                <Text>{item.product.quantity}</Text>
+                <Text>{item.quantity}</Text>
               </View>
               <View style={styles.cell_4}>
-                <Text>{item.product.price}</Text>
+                <Text>{item.price}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text>{fCurrency(item.product.price * item.product.quantity)}</Text>
+                <Text>{fCurrency(item.price * item.quantity)}</Text>
               </View>
             </View>
           ))}
 
           {[
             { name: 'Subtotal', value: subtotal },
-            // { name: 'Shipping', value: -shipping },
-            // { name: 'Discount', value: -discount },
+            { name: 'Shipping', value: -shipping },
+            { name: 'Discount', value: -discount },
             { name: 'Taxes', value: taxes },
             { name: 'Total', value: totalAmount, styles: styles.h4 },
           ].map((item) => (

@@ -7,6 +7,8 @@ import { DashboardLayout } from 'src/layouts/dashboard';
 import { LoadingScreen } from 'src/components/loading-screen';
 
 import { AuthGuard } from 'src/auth/guard';
+// import { SearchByHsn } from 'src/sections/search/view/order-details-view';
+import { SearchByHsnList } from 'src/sections/search/view/order-list-view';
 
 // ----------------------------------------------------------------------
 
@@ -114,6 +116,14 @@ export const dashboardRoutes = [
         path: 'order',
         children: [
           { element: <OrderListPage />, index: true },
+          { path: 'list', element: <OrderListPage /> },
+          { path: ':id', element: <OrderDetailsPage /> },
+        ],
+      },
+      {
+        path: 'hsnSearch',
+        children: [
+          { element: <SearchByHsnList />, index: true },
           { path: 'list', element: <OrderListPage /> },
           { path: ':id', element: <OrderDetailsPage /> },
         ],

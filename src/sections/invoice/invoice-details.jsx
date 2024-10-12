@@ -94,16 +94,14 @@ export function InvoiceDetails({ invoice }) {
         <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
           NOTES
         </Typography>
-        <Typography variant="body2">
-          We appreciate your business. Should you need us to add VAT or extra notes let us know!
-        </Typography>
+        <Typography variant="body2">We appreciate your purchase</Typography>
       </div>
 
       <Box flexGrow={{ md: 1 }} sx={{ textAlign: { md: 'right' } }}>
         <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
           Have a question?
         </Typography>
-        <Typography variant="body2">support@minimals.cc</Typography>
+        <Typography variant="body2">info@velonna.co</Typography>
       </Box>
     </Box>
   );
@@ -132,19 +130,19 @@ export function InvoiceDetails({ invoice }) {
 
               <TableCell>
                 <Box sx={{ maxWidth: 560 }}>
-                  <Typography variant="subtitle2">{row.title}</Typography>
+                  <Typography variant="subtitle2">{row.product.title}</Typography>
 
                   <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                    {row.description}
+                    {row.product.gross_weight}
                   </Typography>
                 </Box>
               </TableCell>
 
-              <TableCell>{row.quantity}</TableCell>
+              <TableCell>{row.product.quantity}</TableCell>
 
-              <TableCell align="right">{fCurrency(row.price)}</TableCell>
+              <TableCell align="right">{fCurrency(row.product.price)}</TableCell>
 
-              <TableCell align="right">{fCurrency(row.price * row.quantity)}</TableCell>
+              <TableCell align="right">{fCurrency(row.product.price * row.product.quantity)}</TableCell>
             </TableRow>
           ))}
 
@@ -173,8 +171,8 @@ export function InvoiceDetails({ invoice }) {
           <Box
             component="img"
             alt="logo"
-            src="/logo/logo-single.svg"
-            sx={{ width: 48, height: 48 }}
+            src="/logo/logo-full.svg"
+            sx={{ width: 120, height: 100 }}
           />
 
           <Stack spacing={1} alignItems={{ xs: 'flex-start', md: 'flex-end' }}>
@@ -197,15 +195,15 @@ export function InvoiceDetails({ invoice }) {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Invoice from
             </Typography>
-            {invoice?.invoiceFrom.name}
+            Velonna.co
             <br />
-            {invoice?.invoiceFrom.fullAddress}
+            info@velonnna.co
             <br />
-            Phone: {invoice?.invoiceFrom.phoneNumber}
+            contact: contact@velonna.co
             <br />
           </Stack>
 
-          <Stack sx={{ typography: 'body2' }}>
+          {/* <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Invoice to
             </Typography>
@@ -215,7 +213,7 @@ export function InvoiceDetails({ invoice }) {
             <br />
             Phone: {invoice?.invoiceTo.phoneNumber}
             <br />
-          </Stack>
+          </Stack> */}
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
