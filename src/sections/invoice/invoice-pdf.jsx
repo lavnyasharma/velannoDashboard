@@ -90,12 +90,12 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
   const renderHeader = (
     <View style={[styles.container, styles.mb40]}>
-      <Image source="/logo/logo-full.png" style={{ width: 48, height: 48 }} />
+      <Image src="/logo/logo-full.png" style={{ width: 130, }} />
 
-      <View style={{ alignItems: 'flex-end', flexDirection: 'column' }}>
-        {/* <Text style={[styles.h3, { textTransform: 'capitalize' }]}>{currentStatus}</Text> */}
-        <Text> {invoiceNumber} </Text>
-      </View>
+      {/* <View style={{ alignItems: 'flex-end', flexDirection: 'column' }}>
+         <Text style={[styles.h3, { textTransform: 'capitalize' }]}>{currentStatus}</Text> 
+        <Text>  </Text>
+      </View> */}
     </View>
   );
 
@@ -115,24 +115,19 @@ export function InvoicePDF({ invoice, currentStatus }) {
   );
 
   const renderInfo = (
-    <View style={[styles.container, styles.mb40]}>
-      <View style={{ width: '50%' }}>
-   
-              Invoice from
-            Velonna.co
-            <br />
-            info@velonnna.co
-            <br />
-            contact: contact@velonna.co
-            <br />
+   <View style={[styles.container]}>
+      <View style={{ width: '100%' }}>
+      <Text style={[styles.subtitle2, styles.mb4]}>Estimate from</Text>
+        <Text style={styles.body2}>Velonna.co</Text>
+        <Text style={styles.body2}>Contact us on: info@velonnna.co</Text>
       </View>
 
-      <View style={{ width: '50%' }}>
-        {/* <Text style={[styles.subtitle2, styles.mb4]}>Invoice to</Text>
-        <Text style={styles.body2}>{invoiceTo.name}</Text>
-        <Text style={styles.body2}>{invoiceTo.fullAddress}</Text>
-        <Text style={styles.body2}>{invoiceTo.phoneNumber}</Text> */}
-      </View>
+       <View style={{ width: '50%' }}>
+        <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
+        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).name}</Text>
+        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).email}</Text>
+        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).phone}</Text> 
+      </View> 
     </View>
   );
 
@@ -141,10 +136,6 @@ export function InvoicePDF({ invoice, currentStatus }) {
       <View style={{ width: '50%' }}>
         <Text style={[styles.subtitle2, styles.mb4]}>Date create</Text>
         <Text style={styles.body2}>{fDate(createDate)}</Text>
-      </View>
-      <View style={{ width: '50%' }}>
-        <Text style={[styles.subtitle2, styles.mb4]}>Due date</Text>
-        <Text style={styles.body2}>{fDate(dueDate)}</Text>
       </View>
     </View>
   );
@@ -160,13 +151,13 @@ export function InvoicePDF({ invoice, currentStatus }) {
               <Text style={styles.subtitle2}>#</Text>
             </View>
             <View style={styles.cell_2}>
-              <Text style={styles.subtitle2}>gross_weight</Text>
+              <Text style={styles.subtitle2}>Name (Unit Price)</Text>
             </View>
             <View style={styles.cell_3}>
-              <Text style={styles.subtitle2}>Qty</Text>
+              <Text style={styles.subtitle2}>Weight</Text>
             </View>
             <View style={styles.cell_4}>
-              <Text style={styles.subtitle2}>Unit price</Text>
+              <Text style={styles.subtitle2}>Quantity</Text>
             </View>
             <View style={[styles.cell_5, { textAlign: 'right' }]}>
               <Text style={styles.subtitle2}>Total</Text>
@@ -182,13 +173,13 @@ export function InvoicePDF({ invoice, currentStatus }) {
               </View>
               <View style={styles.cell_2}>
                 <Text style={styles.subtitle2}>{item.product.title}</Text>
-                <Text>{item.product.gross_weight}</Text>
+                <Text>{item.product.price}</Text>
               </View>
               <View style={styles.cell_3}>
-                <Text>{item.product.quantity}</Text>
+              <Text>{`${item.product.gross_weight}g`}</Text>
               </View>
               <View style={styles.cell_4}>
-                <Text>{item.product.price}</Text>
+                <Text>{item.product.quantity}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
                 <Text>{fCurrency(item.product.price * item.product.quantity)}</Text>
@@ -200,8 +191,8 @@ export function InvoicePDF({ invoice, currentStatus }) {
             { name: 'Subtotal', value: subtotal },
             // { name: 'Shipping', value: -shipping },
             // { name: 'Discount', value: -discount },
-            { name: 'Taxes', value: taxes },
-            { name: 'Total', value: totalAmount, styles: styles.h4 },
+            { name: 'Taxes', value: `${taxes}%(GST)` },
+            { name: 'Total', value: fCurrency(Number(totalAmount)*1.03), styles: styles.h4 },
           ].map((item) => (
             <View key={item.name} style={[styles.row, styles.noBorder]}>
               <View style={styles.cell_1} />
@@ -211,7 +202,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
                 <Text style={item.styles}>{item.name}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text style={item.styles}>{fCurrency(item.value)}</Text>
+                <Text style={item.styles}>{(item.value)}</Text>
               </View>
             </View>
           ))}
@@ -230,7 +221,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
         {renderTime}
 
         {renderTable}
-
+        
         {renderFooter}
       </Page>
     </Document>

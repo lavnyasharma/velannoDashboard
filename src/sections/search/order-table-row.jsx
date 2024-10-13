@@ -25,7 +25,15 @@ import { usePopover, CustomPopover } from 'src/components/custom-popover';
 
 // ----------------------------------------------------------------------
 
-export function OrderTableRow({ row,cart=true, selected, onViewRow, onSelectRow, onDeleteRow }) {
+export function OrderTableRow({
+  row,
+  cart = true,
+  selected,
+  onAdd,
+  onViewRow,
+  onSelectRow,
+  onDeleteRow,
+}) {
   const confirm = useBoolean();
 
   const collapse = useBoolean();
@@ -101,29 +109,38 @@ export function OrderTableRow({ row,cart=true, selected, onViewRow, onSelectRow,
       </TableCell>
 
       <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
-        {cart?<IconButton
-          color={collapse.value ? 'inherit' : 'default'}
-          onClick={async ()=>{
-            const resp = axiosInstance.post("https://api.velonna.co/cart/",{
-              product:row.hsn,
-              quantity:"1"
-            }).then((res)=>{
-              toast.success(`item ${row.hsn} added to cart` )
-            }).catch((error)=>{
-              toast.error(error.detail)
-            })
-          }}
-          sx={{ ...(collapse.value && { bgcolor: 'action.hover' }) }}
-        >
-          <Iconify icon="mynaui:cart-plus-solid" />
-        </IconButton>:""}
-
-        <IconButton color={popover.open ? 'inherit' : 'default'} onClick={() => {
+        {cart ? (
+          <IconButton
+            color={collapse.value ? 'inherit' : 'default'}
+            onClick={async () => {
+              const resp = axiosInstance
+                .post('https://api.velonna.co/cart/', {
+                  product: row.hsn,
+                  quantity: '1',
+                })
+                .then((res) => {
+                  onAdd();
+                  toast.success(`item ${row.hsn} added to cart`);
+                })
+                .catch((error) => {
+                  toast.error(error.detail);
+                });
+            }}
+            sx={{ ...(collapse.value && { bgcolor: 'action.hover' }) }}
+          >
+            <Iconify icon="mynaui:cart-plus-solid" />
+          </IconButton>
+        ) : (
+          <IconButton
+            color={popover.open ? 'inherit' : 'default'}
+            onClick={() => {
               confirm.onTrue();
               popover.onClose();
-            }}>
-          <Iconify icon="solar:trash-bin-trash-bold" />
-        </IconButton>
+            }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+          </IconButton>
+        )}
       </TableCell>
     </TableRow>
   );
@@ -220,7 +237,15 @@ export function OrderTableRow({ row,cart=true, selected, onViewRow, onSelectRow,
         title="Delete"
         content="Are you sure want to delete?"
         action={
-          <Button variant="contained" color="error" onClick={onDeleteRow}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              onDeleteRow();
+              
+              confirm.onFalse()
+            }}
+          >
             Delete
           </Button>
         }

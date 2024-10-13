@@ -168,7 +168,7 @@ const StyledNavItem = styled(ButtonBase, {
       // State
       ...(active && {
         color: 'var(--nav-item-root-active-color)',
-        backgroundColor: 'var(--nav-item-root-active-bg)',
+        backgroundColor: 'rgb(0 0 0 / 8%)',
         '&:hover': {
           backgroundColor: 'var(--nav-item-root-active-hover-bg)',
         },

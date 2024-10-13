@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState,useEffect, useCallback } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
+import axiosInstance from 'src/utils/axios';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -48,6 +49,7 @@ import { OrderTableFiltersResult } from '../order-table-filters-result';
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...ORDER_STATUS_OPTIONS];
 
+
 const TABLE_HEAD = [
   { id: 'orderNumber', label: 'Order', width: 88 },
   { id: 'name', label: 'Customer' },
@@ -59,13 +61,14 @@ const TABLE_HEAD = [
     align: 'center',
   },
   { id: 'totalAmount', label: 'Price', width: 140 },
-  { id: 'status', label: 'Status', width: 110 },
-  { id: '', width: 88 },
+  // { id: 'status', label: 'Status', width: 110 },
+  // { id: '', width: 88 },
 ];
 
 // ----------------------------------------------------------------------
 
 export function OrderListView() {
+  const [listData, setlistData] = useState([]);
   const table = useTable({ defaultOrderBy: 'orderNumber' });
 
   const router = useRouter();
@@ -75,29 +78,37 @@ export function OrderListView() {
   const [tableData, setTableData] = useState(_orders);
 
   const filters = useSetState({
-    name: '',
-    status: 'all',
-    startDate: null,
-    endDate: null,
+    id:"",
   });
 
+  const getListData = async () => {
+    const resp = await axiosInstance.get('https://api.velonna.co/order-lists/').then((res) => {
+      console.log(res.data.results);
+      setlistData(res.data.results);
+    });
+  };
+  useEffect(() => {
+    // if (listData.length === 0) {
+      getListData();
+    // }
+  }, []);
   const dateError = fIsAfter(filters.state.startDate, filters.state.endDate);
 
   const dataFiltered = applyFilter({
-    inputData: tableData,
+    inputData: listData,
     comparator: getComparator(table.order, table.orderBy),
     filters: filters.state,
     dateError,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
+  const dataInPage = rowInPage(listData, table.page, table.rowsPerPage);
 
   const canReset =
     !!filters.state.name ||
     filters.state.status !== 'all' ||
     (!!filters.state.startDate && !!filters.state.endDate);
 
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  const notFound = (!listData.length && canReset) || !listData.length;
 
   const handleDeleteRow = useCallback(
     (id) => {
@@ -142,7 +153,7 @@ export function OrderListView() {
 
   return (
     <>
-      <DashboardContent>
+     {listData.length !==0? <DashboardContent>
         <CustomBreadcrumbs
           heading="List"
           links={[
@@ -154,7 +165,7 @@ export function OrderListView() {
         />
 
         <Card>
-          <Tabs
+          {/* <Tabs
             value={filters.state.status}
             onChange={handleFilterStatus}
             sx={{
@@ -189,25 +200,25 @@ export function OrderListView() {
                 }
               />
             ))}
-          </Tabs>
+          </Tabs> */}
 
-          <OrderTableToolbar
+          {/* <OrderTableToolbar
             filters={filters}
             onResetPage={table.onResetPage}
             dateError={dateError}
-          />
+          /> */}
 
-          {canReset && (
+          {/* {canReset && (
             <OrderTableFiltersResult
               filters={filters}
               totalResults={dataFiltered.length}
               onResetPage={table.onResetPage}
               sx={{ p: 2.5, pt: 0 }}
             />
-          )}
+          )} */}
 
           <Box sx={{ position: 'relative' }}>
-            <TableSelectedAction
+            {/* <TableSelectedAction
               dense={table.dense}
               numSelected={table.selected.length}
               rowCount={dataFiltered.length}
@@ -224,7 +235,7 @@ export function OrderListView() {
                   </IconButton>
                 </Tooltip>
               }
-            />
+            /> */}
 
             <Scrollbar sx={{ minHeight: 444 }}>
               <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
@@ -244,7 +255,7 @@ export function OrderListView() {
                 />
 
                 <TableBody>
-                  {dataFiltered
+                 {listData
                     .slice(
                       table.page * table.rowsPerPage,
                       table.page * table.rowsPerPage + table.rowsPerPage
@@ -258,7 +269,7 @@ export function OrderListView() {
                         onDeleteRow={() => handleDeleteRow(row.id)}
                         onViewRow={() => handleViewRow(row.id)}
                       />
-                    ))}
+                    ))} 
 
                   <TableEmptyRows
                     height={table.dense ? 56 : 56 + 20}
@@ -274,14 +285,14 @@ export function OrderListView() {
           <TablePaginationCustom
             page={table.page}
             dense={table.dense}
-            count={dataFiltered.length}
+            count={listData.length}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
             onChangeDense={table.onChangeDense}
             onRowsPerPageChange={table.onChangeRowsPerPage}
           />
         </Card>
-      </DashboardContent>
+      </DashboardContent>:"Loading Orders"}
 
       <ConfirmDialog
         open={confirm.value}
@@ -309,8 +320,8 @@ export function OrderListView() {
   );
 }
 
-function applyFilter({ inputData, comparator, filters, dateError }) {
-  const { status, name, startDate, endDate } = filters;
+function applyFilter({ inputData, comparator, filters }) {
+  const { id } = filters; // Get the id filter from filters
 
   const stabilizedThis = inputData.map((el, index) => [el, index]);
 
@@ -322,23 +333,9 @@ function applyFilter({ inputData, comparator, filters, dateError }) {
 
   inputData = stabilizedThis.map((el) => el[0]);
 
-  if (name) {
-    inputData = inputData.filter(
-      (order) =>
-        order.orderNumber.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        order.customer.name.toLowerCase().indexOf(name.toLowerCase()) !== -1 ||
-        order.customer.email.toLowerCase().indexOf(name.toLowerCase()) !== -1
-    );
-  }
-
-  if (status !== 'all') {
-    inputData = inputData.filter((order) => order.status === status);
-  }
-
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter((order) => fIsBetween(order.createdAt, startDate, endDate));
-    }
+  // Filter by id if it is provided
+  if (id !== null && id !== undefined) { // Ensure id is not null or undefined
+    inputData = inputData.filter((order) => order.id === id);
   }
 
   return inputData;

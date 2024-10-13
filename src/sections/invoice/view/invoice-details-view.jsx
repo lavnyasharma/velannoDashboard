@@ -28,9 +28,9 @@ export function InvoiceDetailsView({ invoice }) {
 
   const invoicess = {
     items: invoice,
-    taxes: 100,
+    taxes: 3,
     dueDate: getTodayDateString(),
-
+    
     subtotal: calculateSubtotal(invoice),
 
     createDate: getTodayDateString(),

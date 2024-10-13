@@ -20,7 +20,7 @@ export function OrderTableToolbar({ filters, onResetPage, dateError }) {
   const handleFilterName = useCallback(
     (event) => {
       onResetPage();
-      filters.setState({ name: event.target.value });
+      filters.setState({ id: event.target.value });
     },
     [filters, onResetPage]
   );
@@ -49,7 +49,7 @@ export function OrderTableToolbar({ filters, onResetPage, dateError }) {
         direction={{ xs: 'column', md: 'row' }}
         sx={{ p: 2.5, pr: { xs: 2.5, md: 1 } }}
       >
-        <DatePicker
+        {/* <DatePicker
           label="Start date"
           value={filters.state.startDate}
           onChange={handleFilterStartDate}
@@ -75,12 +75,12 @@ export function OrderTableToolbar({ filters, onResetPage, dateError }) {
               bottom: { md: -40 },
             },
           }}
-        />
+        /> */}
 
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
           <TextField
             fullWidth
-            value={filters.state.name}
+            value={filters.state.id}
             onChange={handleFilterName}
             placeholder="Search customer or order number..."
             InputProps={{

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFViewer, PDFDownloadLink, pdf } from '@react-pdf/renderer';
 
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
@@ -12,6 +12,8 @@ import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
+import axiosInstance from 'src/utils/axios';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
@@ -19,6 +21,7 @@ import { useRouter } from 'src/routes/hooks';
 import { useBoolean } from 'src/hooks/use-boolean';
 
 import { Iconify } from 'src/components/iconify';
+import { toast } from 'src/components/snackbar';
 
 import { InvoicePDF } from './invoice-pdf';
 
@@ -26,20 +29,58 @@ import { InvoicePDF } from './invoice-pdf';
 
 export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus }) {
   const router = useRouter();
-  console.log(invoice)
-
+  const confirm = useBoolean();
   const view = useBoolean();
 
   const handleEdit = useCallback(() => {
     router.push(paths.dashboard.invoice.edit(`${invoice?.id}`));
   }, [invoice?.id, router]);
 
+
+  const closeOrder = async () =>{
+    const resp = await axiosInstance
+      .post('https://api.velonna.co/order/counter/', {
+        name: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).name?JSON.parse(localStorage.getItem('userData')).name:"":"",
+        email: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).email?JSON.parse(localStorage.getItem('userData')).email:"":"",
+        phone: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).phone?JSON.parse(localStorage.getItem('userData')).phone:"":"",
+      })
+      .then(async (res) => {
+        toast.success('Order Created');
+        localStorage.removeItem('userData');
+        router.push(paths.dashboard.search.root)
+      })
+      .catch((error) => {
+        toast.error(`some thing went wrong ${String(error)} Please Contact administrator`);
+      });
+  }
+  const handlePrint = useCallback(async () => {
+    
+        if (!invoice) return;
+
+        // Generate PDF blob
+        const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
+        const url = URL.createObjectURL(blob);
+
+        // Create a temporary iframe for printing
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none'; // Hide the iframe
+        document.body.appendChild(iframe);
+
+        // Set the source of the iframe to the PDF blob URL
+        iframe.src = url;
+        console.log(url);
+
+        // Trigger print when the iframe loads the PDF
+        iframe.onload = () => {
+          iframe.contentWindow.print();
+
+          confirm.onTrue();
+        };
+  }, [invoice,confirm]);
   const renderDownload = (
     <NoSsr>
       <PDFDownloadLink
-        document={
-          invoice ? <InvoicePDF invoice={invoice}  /> : <span />
-        }
+        document={invoice ? <InvoicePDF invoice={invoice} /> : <span />}
         fileName={invoice?.invoiceNumber}
         style={{ textDecoration: 'none' }}
       >
@@ -55,6 +96,21 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
           </Tooltip>
         )}
       </PDFDownloadLink>
+
+
+      <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        title="Close Order"
+        content="Done With Billing? Close Order?"
+        action={
+          <Button variant="contained" color="error" onClick={async ()=>{
+            closeOrder()
+          }}>
+            Close Order
+          </Button>
+        }
+      />
     </NoSsr>
   );
 
@@ -82,7 +138,11 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
           {renderDownload}
 
           <Tooltip title="Print">
-            <IconButton>
+            <IconButton
+              onClick={() => {
+                handlePrint();
+              }}
+            >
               <Iconify icon="solar:printer-minimalistic-bold" />
             </IconButton>
           </Tooltip>

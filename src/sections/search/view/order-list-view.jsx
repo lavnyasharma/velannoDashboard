@@ -12,11 +12,10 @@ import axiosInstance from 'src/utils/axios';
 import IconButton from '@mui/material/IconButton';
 import { useRouter } from 'src/routes/hooks';
 import { paths } from 'src/routes/paths';
-
 import { Iconify } from 'src/components/iconify';
-
-
+import Modal from '@mui/material/Modal';
 import { OrderTableRow } from '../order-table-row'; // Adjust if necessary
+
 
 const TABLE_HEAD = [
   { id: 'hsn', label: 'HSN', width: 88 },
@@ -28,7 +27,6 @@ const TABLE_HEAD = [
   { id: 'actions', label: 'actions', width: 88 },
 ];
 
-
 const TABLE_HEAD_CART = [
   { id: 'hsn', label: 'HSN', width: 88 },
   { id: 'name', label: 'Name' },
@@ -39,20 +37,14 @@ const TABLE_HEAD_CART = [
   { id: 'actions', label: 'actions', width: 88 },
 ];
 
-// ----------------------------------------------------------------------
-
 export function SearchByHsnList() {
-
   const router = useRouter();
-  const [tableData, setTableData] = useState({}); // Initialize with an empty array
+  const [tableData, setTableData] = useState({});
   const [hsnInput, setHsnInput] = useState('');
   const [cart, setCart] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '' });
 
-  const deleteCartItem = async (id) => {
-    const resp = await axiosInstance.delete(`https://api.velonna.co/cart-item/${id}/`).then((res)=>{
-      toast.success(`Item Removed`)
-    })
-  };
   
 
   const getCartData = async () => {
@@ -61,11 +53,19 @@ export function SearchByHsnList() {
       setCart(res.data.results);
     });
   };
+  const deleteCartItem = async (id) => {
+    await axiosInstance.delete(`https://api.velonna.co/cart-item/${id}/`).then((res) => {
+      toast.success('Item Removed');
+      getCartData()
+    });
+  };
+
   useEffect(() => {
-    if (cart.length === 0) {
+    // if (cart.length === 0) {
       getCartData();
-    }
-  }, [cart]);
+    // }
+  }, []);
+
   const handleSearchByHsn = async () => {
     try {
       const response = await fetch(`https://api.velonna.co/product/${hsnInput}/details`, {
@@ -77,20 +77,37 @@ export function SearchByHsnList() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data); // Inspect the structure of the fetched data
-
-        // If the API returns a single product, make it an array for rendering
         setTableData(data);
         toast.success('Product details fetched successfully!');
       } else {
         const errorResponse = await response.json();
-        console.error('Error response:', errorResponse);
         toast.error('Failed to fetch product details');
       }
     } catch (error) {
-      console.error('Fetch error:', error);
       toast.error('Error fetching product details');
     }
+  };
+
+  const handleConfirmOrder = () => {
+    const savedData = JSON.parse(localStorage.getItem('userData')); 
+    if (savedData) {
+      setUserData(savedData); // Pre-fill modal fields if data exists
+    }
+    setOpenModal(true); // Open the modal on Confirm Order click
+  };
+
+  const handleOrderSubmission = () => {
+    // Save user data to localStorage
+    localStorage.setItem('userData', JSON.stringify(userData));
+
+    // Proceed with order submission process
+    router.push(paths.dashboard.invoice.details("productinvoice"));
+    setOpenModal(false); // Close the modal after submission
+    toast.success('Order confirmed!');
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
   };
 
   return (
@@ -115,9 +132,10 @@ export function SearchByHsnList() {
             <Table>
               <TableHeadCustom headLabel={TABLE_HEAD} />
               <TableBody>
-                {Object.keys(tableData).length > 0 ? ( // Check if there are any rows to render
+                {Object.keys(tableData).length > 0 ? (
                   <OrderTableRow
-                    key={tableData.uuid || tableData.hsn} // Use uuid or hsn as key if uuid is missing
+                    key={tableData.uuid || tableData.hsn}
+                    onAdd={getCartData}
                     row={{
                       hsn: tableData.hsn,
                       price: tableData.price,
@@ -140,19 +158,12 @@ export function SearchByHsnList() {
             </Table>
           </Scrollbar>
         </Card>
+
         <Box sx={{ p: 2 }} />
         <Card>
           <Box sx={{ p: 2 }} width="100%" display="flex" justifyContent="space-between">
             <span>Current Cart</span>
-            <Button
-              color='success'
-              onClick={() => {
-              //  http://localhost:3000/dashboard/invoice/e99f09a7-dd88-49d5-b1c8-1daf80c2d7b2
-              router.push(paths.dashboard.invoice.details("productinvoice")
-              )
-
-              }}
-            >
+            <Button color="success" disabled={cart.length===0} onClick={handleConfirmOrder}>
               Confirm Order
             </Button>
           </Box>
@@ -160,13 +171,14 @@ export function SearchByHsnList() {
             <Table>
               <TableHeadCustom headLabel={TABLE_HEAD_CART} />
               <TableBody>
-                {cart.length > 0 ? ( // Check if there are any rows to render
+                {cart.length > 0 ? (
                   cart.map((item) => (
                     <OrderTableRow
-                      key={item.product.hsn} // Use uuid or hsn as key if uuid is missing
+                      key={item.product.hsn}
                       cart={false}
-                      onDeleteRow={()=>{
-                        deleteCartItem(item.id)
+                      onDeleteRow={() => {
+                        deleteCartItem(item.id);
+                       
                       }}
                       row={{
                         hsn: item.product.hsn,
@@ -191,6 +203,42 @@ export function SearchByHsnList() {
           </Scrollbar>
         </Card>
       </DashboardContent>
+
+      {/* Modal for User Info */}
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, boxShadow: 24, width: 400 }}>
+          <h2>Enter your details</h2>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Name"
+            value={userData.name}
+            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Email"
+            value={userData.email}
+            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Phone Number"
+            value={userData.phone}
+            onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+          />
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+            <Button onClick={handleCloseModal} sx={{ mr: 1 }}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleOrderSubmission}>
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </>
   );
 }

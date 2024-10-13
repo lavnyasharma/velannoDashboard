@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -19,6 +19,7 @@ import { INVOICE_STATUS_OPTIONS } from 'src/_mock';
 
 import { Label } from 'src/components/label';
 import { Scrollbar } from 'src/components/scrollbar';
+import { Button } from '@mui/material';
 
 import { InvoiceToolbar } from './invoice-toolbar';
 
@@ -41,6 +42,9 @@ export function InvoiceDetails({ invoice }) {
   const handleChangeStatus = useCallback((event) => {
     setCurrentStatus(event.target.value);
   }, []);
+  const cardRef = useRef();
+
+  
 
   const renderTotal = (
     <>
@@ -52,37 +56,30 @@ export function InvoiceDetails({ invoice }) {
         </TableCell>
         <TableCell width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          Rs {(invoice?.subtotal)}
+          {fCurrency(invoice?.subtotal)}
         </TableCell>
       </StyledTableRow>
 
-      <StyledTableRow>
-        <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Shipping</TableCell>
-        <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          -  {(invoice?.shipping)}
-        </TableCell>
-      </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Discount</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          -  {(invoice?.discount)}
+          - {invoice?.discount}
         </TableCell>
       </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Taxes</TableCell>
-        <TableCell width={120}>Rs {(invoice?.taxes)}</TableCell>
+        <TableCell width={120}>{`${invoice?.taxes}%(GST)`}</TableCell>
       </StyledTableRow>
 
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          Rs {(invoice?.totalAmount)}
+          {fCurrency(Number(invoice?.totalAmount)*1.03)}
         </TableCell>
       </StyledTableRow>
     </>
@@ -133,16 +130,16 @@ export function InvoiceDetails({ invoice }) {
                   <Typography variant="subtitle2">{row.product.title}</Typography>
 
                   <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                    {row.product.gross_weight}
+                    {`${row.product.gross_weight}g`}
                   </Typography>
                 </Box>
               </TableCell>
 
               <TableCell>{row.product.quantity}</TableCell>
 
-              <TableCell align="right">Rs {(row.product.price)}</TableCell>
+              <TableCell align="right">{fCurrency(row.product.price)}</TableCell>
 
-              <TableCell align="right">Rs{(row.product.price * row.product.quantity)}</TableCell>
+              <TableCell align="right">{fCurrency(row.product.price * row.product.quantity)}</TableCell>
             </TableRow>
           ))}
 
@@ -160,8 +157,8 @@ export function InvoiceDetails({ invoice }) {
         onChangeStatus={handleChangeStatus}
         statusOptions={INVOICE_STATUS_OPTIONS}
       />
-
-      <Card sx={{ pt: 5, px: 5 }}>
+     
+      <Card sx={{ pt: 5, px: 5 }} ref={cardRef}>
         <Box
           rowGap={5}
           display="grid"
@@ -176,7 +173,7 @@ export function InvoiceDetails({ invoice }) {
           />
 
           <Stack spacing={1} alignItems={{ xs: 'flex-start', md: 'flex-end' }}>
-            <Label
+            {/* <Label
               variant="soft"
               color={
                 (currentStatus === 'paid' && 'success') ||
@@ -185,15 +182,15 @@ export function InvoiceDetails({ invoice }) {
                 'default'
               }
             >
-              {currentStatus}
-            </Label>
+             
+            </Label> */}
 
             <Typography variant="h6">{invoice?.invoiceNumber}</Typography>
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Invoice from
+              Estimate from
             </Typography>
             Velonna.co
             <br />
@@ -203,17 +200,17 @@ export function InvoiceDetails({ invoice }) {
             <br />
           </Stack>
 
-          {/* <Stack sx={{ typography: 'body2' }}>
+           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
-              Invoice to
+              Estimate to
             </Typography>
-            {invoice?.invoiceTo.name}
+            {JSON.parse(localStorage.getItem("userData")).name}
             <br />
-            {invoice?.invoiceTo.fullAddress}
+            {JSON.parse(localStorage.getItem("userData")).email}
             <br />
-            Phone: {invoice?.invoiceTo.phoneNumber}
+            Phone: {JSON.parse(localStorage.getItem("userData")).phone}
             <br />
-          </Stack> */}
+          </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -236,6 +233,8 @@ export function InvoiceDetails({ invoice }) {
 
         {renderFooter}
       </Card>
+
+     
     </>
   );
 }

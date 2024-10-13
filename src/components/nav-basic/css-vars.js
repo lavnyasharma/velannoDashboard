@@ -15,7 +15,7 @@ function desktopVars(theme) {
     '--nav-item-caption-color': palette.text.disabled,
     // root
     '--nav-item-root-padding': '0',
-    '--nav-item-root-active-color': palette.primary.main,
+    '--nav-item-root-active-color': '#000',
     // sub
     '--nav-item-sub-radius': `${shape.borderRadius * 0.75}px`,
     '--nav-item-sub-padding': spacing(0.75, 1, 0.75, 1),
@@ -53,9 +53,9 @@ function mobileVars(theme) {
     '--nav-item-caption-color': palette.text.disabled,
     // root
     '--nav-item-root-height': '44px',
-    '--nav-item-root-active-color': palette.primary.main,
+    '--nav-item-root-active-color': '#000',
     '--nav-item-root-active-color-on-dark': palette.primary.light,
-    '--nav-item-root-active-bg': varAlpha(palette.primary.mainChannel, 0.08),
+    '--nav-item-root-active-bg': 'rgb(0 0 0 / 8%)',
     '--nav-item-root-active-hover-bg': varAlpha(palette.primary.mainChannel, 0.16),
     '--nav-item-root-open-color': palette.text.primary,
     '--nav-item-root-open-bg': palette.action.hover,
