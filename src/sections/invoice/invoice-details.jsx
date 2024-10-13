@@ -44,7 +44,7 @@ export function InvoiceDetails({ invoice }) {
   }, []);
   const cardRef = useRef();
 
-  
+
 
   const renderTotal = (
     <>
@@ -56,7 +56,7 @@ export function InvoiceDetails({ invoice }) {
         </TableCell>
         <TableCell width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          {fCurrency(invoice?.subtotal)}
+          {fCurrency(invoice?.subtotal[0])}
         </TableCell>
       </StyledTableRow>
 
@@ -65,21 +65,16 @@ export function InvoiceDetails({ invoice }) {
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Discount</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          - {invoice?.discount}
+        {`-${fCurrency((invoice?.subtotal?.[1] || 0) - (invoice?.subtotal?.[0] || 0))}`}
         </TableCell>
       </StyledTableRow>
 
-      <StyledTableRow>
-        <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Taxes</TableCell>
-        <TableCell width={120}>{`${invoice?.taxes}%(GST)`}</TableCell>
-      </StyledTableRow>
-
+     
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {fCurrency(Number(invoice?.totalAmount)*1.03)}
+          {fCurrency(Number(invoice?.subtotal[0]))}
         </TableCell>
       </StyledTableRow>
     </>
@@ -115,6 +110,7 @@ export function InvoiceDetails({ invoice }) {
             <TableCell>Qty</TableCell>
 
             <TableCell align="right">Unit price</TableCell>
+            <TableCell align="right">Discount</TableCell>
 
             <TableCell align="right">Total</TableCell>
           </TableRow>
@@ -138,8 +134,9 @@ export function InvoiceDetails({ invoice }) {
               <TableCell>{row.product.quantity}</TableCell>
 
               <TableCell align="right">{fCurrency(row.product.price)}</TableCell>
+              <TableCell align="right">{row.product.is_gold ? "30%" : "10%"}</TableCell>
 
-              <TableCell align="right">{fCurrency(row.product.price * row.product.quantity)}</TableCell>
+              <TableCell align="right">{row.product.is_gold ? fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * 0.30) : fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * 0.10)}</TableCell>
             </TableRow>
           ))}
 
@@ -157,7 +154,7 @@ export function InvoiceDetails({ invoice }) {
         onChangeStatus={handleChangeStatus}
         statusOptions={INVOICE_STATUS_OPTIONS}
       />
-     
+
       <Card sx={{ pt: 5, px: 5 }} ref={cardRef}>
         <Box
           rowGap={5}
@@ -200,7 +197,7 @@ export function InvoiceDetails({ invoice }) {
             <br />
           </Stack>
 
-           <Stack sx={{ typography: 'body2' }}>
+          <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Estimate to
             </Typography>
@@ -234,7 +231,7 @@ export function InvoiceDetails({ invoice }) {
         {renderFooter}
       </Card>
 
-     
+
     </>
   );
 }

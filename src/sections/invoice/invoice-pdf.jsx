@@ -104,7 +104,10 @@ export function InvoicePDF({ invoice, currentStatus }) {
       <View style={{ width: '75%' }}>
         <Text style={styles.subtitle2}>NOTES</Text>
         <Text>
-          We appreciate your business. 
+          We appreciate your business.
+        </Text>
+        <Text>
+          This is not an official bill.
         </Text>
       </View>
       <View style={{ width: '25%', textAlign: 'right' }}>
@@ -115,19 +118,19 @@ export function InvoicePDF({ invoice, currentStatus }) {
   );
 
   const renderInfo = (
-   <View style={[styles.container]}>
+    <View style={[styles.container]}>
       <View style={{ width: '100%' }}>
-      <Text style={[styles.subtitle2, styles.mb4]}>Estimate from</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>Estimate from</Text>
         <Text style={styles.body2}>Velonna.co</Text>
         <Text style={styles.body2}>Contact us on: info@velonnna.co</Text>
       </View>
 
-       <View style={{ width: '50%' }}>
+      <View style={{ width: '50%' }}>
         <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
         <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).name}</Text>
         <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).email}</Text>
-        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).phone}</Text> 
-      </View> 
+        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).phone}</Text>
+      </View>
     </View>
   );
 
@@ -159,6 +162,9 @@ export function InvoicePDF({ invoice, currentStatus }) {
             <View style={styles.cell_4}>
               <Text style={styles.subtitle2}>Quantity</Text>
             </View>
+            <View style={styles.cell_4}>
+              <Text style={styles.subtitle2}>Discount</Text>
+            </View>
             <View style={[styles.cell_5, { textAlign: 'right' }]}>
               <Text style={styles.subtitle2}>Total</Text>
             </View>
@@ -173,26 +179,28 @@ export function InvoicePDF({ invoice, currentStatus }) {
               </View>
               <View style={styles.cell_2}>
                 <Text style={styles.subtitle2}>{item.product.title}</Text>
-                <Text>{item.product.price}</Text>
+                <Text>{fCurrency(item.product.price)}</Text>
               </View>
               <View style={styles.cell_3}>
-              <Text>{`${item.product.gross_weight}g`}</Text>
+                <Text>{`${item.product.gross_weight}g`}</Text>
               </View>
               <View style={styles.cell_4}>
                 <Text>{item.product.quantity}</Text>
               </View>
+              <View style={styles.cell_4}>
+                <Text align="right">{item.product.is_gold ? "30%" : "10%"}</Text>
+              </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text>{fCurrency(item.product.price * item.product.quantity)}</Text>
+                <Text>{item.product.is_gold ? fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * 0.30) : fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * 0.10)}</Text>
               </View>
             </View>
           ))}
 
           {[
-            { name: 'Subtotal', value: subtotal },
+            { name: 'Subtotal', value: subtotal[0] },
             // { name: 'Shipping', value: -shipping },
-            // { name: 'Discount', value: -discount },
-            { name: 'Taxes', value: `${taxes}%(GST)` },
-            { name: 'Total', value: fCurrency(Number(totalAmount)*1.03), styles: styles.h4 },
+            { name: 'Discount', value: `-${fCurrency(subtotal[1] - subtotal[0])}` },
+            { name: 'Total', value: fCurrency(subtotal[0]), styles: styles.h4 },
           ].map((item) => (
             <View key={item.name} style={[styles.row, styles.noBorder]}>
               <View style={styles.cell_1} />
@@ -221,7 +229,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
         {renderTime}
 
         {renderTable}
-        
+
         {renderFooter}
       </Page>
     </Document>

@@ -9,15 +9,26 @@ import { InvoiceDetails } from '../invoice-details';
 // ----------------------------------------------------------------------
 
 export function InvoiceDetailsView({ invoice }) {
-  function calculateSubtotal (cartItems) {
+  function calculateSubtotal(cartItems) {
     return cartItems.reduce((subtotal, item) => {
       const price = parseFloat(item.product.price); // Convert price to a number
       const quantity = item.quantity; // Get the quantity
       return subtotal + price * quantity; // Accumulate the subtotal
     }, 0);
-  };
+  }
 
-  function getTodayDateString  (){
+  function calculateDiscountedSubtotal(cartItems) {
+    return cartItems.reduce((subtotal, item) => {
+      const price = parseFloat(item.product.price); // Convert price to a number
+      const quantity = item.quantity; // Get the quantity
+      const discount = item.product.is_gold ? 0.30 : 0.10; // 30% for gold, 10% for non-gold
+      const discountedPrice = price * (1 - discount); // Apply discount to the price
+
+      return subtotal + discountedPrice * quantity; // Accumulate the subtotal
+    }, 0);
+  }
+
+  function getTodayDateString() {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
@@ -30,9 +41,9 @@ export function InvoiceDetailsView({ invoice }) {
     items: invoice,
     taxes: 3,
     dueDate: getTodayDateString(),
-    
-    subtotal: calculateSubtotal(invoice),
 
+    subtotal: [calculateDiscountedSubtotal(invoice),calculateSubtotal(invoice)],
+    
     createDate: getTodayDateString(),
     totalAmount: calculateSubtotal(invoice),
   };
