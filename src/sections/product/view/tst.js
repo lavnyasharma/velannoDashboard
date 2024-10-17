@@ -28,7 +28,7 @@ import { Form, Field, schemaHelper } from 'src/components/hook-form';
 export const NewProductSchema = zod.object({
   title: zod.string().min(1, { message: 'Title is required!' }),
   description: schemaHelper.editor({ message: { required_error: 'Description is required!' } }),
-  thumbnail: schemaHelper.files().optional(),
+  thumbnail: schemaHelper.files({ message: { required_error: 'Thumbnail is required!' } }),
   hsn: zod.number().positive({ message: 'HSN is required!' }),
   category: zod.string().nonempty({ message: 'Category is required!' }),
   collection: zod.string().optional(),
@@ -50,7 +50,8 @@ export const NewProductSchema = zod.object({
   is_live: zod.boolean().optional(),
   views: zod.number().default(0),
   is_deleted: zod.boolean().default(false),
- 
+  newLabel: zod.object({ enabled: zod.boolean(), content: zod.string().optional() }),
+  saleLabel: zod.object({ enabled: zod.boolean(), content: zod.string().optional() }),
 });
 
 // ----------------------------------------------------------------------
@@ -64,7 +65,7 @@ export function ProductNewEditForm({ currentProduct }) {
     () => ({
       title: currentProduct?.title || '',
       description: currentProduct?.description || '',
-      thumbnail: currentProduct?.thumbnail || '',
+      thumbnail: currentProduct?.thumbnail || null,
       hsn: currentProduct?.hsn || '',
       category: currentProduct?.category || PRODUCT_CATEGORY_GROUP_OPTIONS[0]?.classify[0],
       collection: currentProduct?.collection || '',
@@ -77,7 +78,7 @@ export function ProductNewEditForm({ currentProduct }) {
       gross_weight: currentProduct?.gross_weight || null,
       net_weight: currentProduct?.net_weight || null,
       diamond_weight: currentProduct?.diamond_weight || null,
-      stock_photo: currentProduct?.stock_photo || '',
+      stock_photo: currentProduct?.stock_photo || null,
       kt: currentProduct?.kt || '',
       diamond_clearity: currentProduct?.diamond_clearity || '',
       is_gold: currentProduct?.is_gold || false,
@@ -85,7 +86,8 @@ export function ProductNewEditForm({ currentProduct }) {
       is_live: currentProduct?.is_live || false,
       views: currentProduct?.views || 0,
       is_deleted: currentProduct?.is_deleted || false,
-     
+      newLabel: currentProduct?.newLabel || { enabled: false, content: '' },
+      saleLabel: currentProduct?.saleLabel || { enabled: false, content: '' },
     }),
     [currentProduct]
   );
@@ -132,7 +134,7 @@ export function ProductNewEditForm({ currentProduct }) {
   );
 
   const handleRemoveAllFiles = useCallback(() => {
-    setValue('thumbnail', '', { shouldValidate: true });
+    setValue('thumbnail', [], { shouldValidate: true });
   }, [setValue]);
 
   const handleChangeIncludeTaxes = useCallback((event) => {

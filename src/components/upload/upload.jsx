@@ -39,7 +39,7 @@ export function Upload({
   const isArray = Array.isArray(value) && multiple;
 
   const hasFile = !isArray && !!value;
-
+  
   const hasFiles = isArray && !!value.length;
 
   const hasError = isDragReject || !!error;
