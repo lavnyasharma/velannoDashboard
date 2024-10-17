@@ -9,8 +9,9 @@ import { uploadClasses } from '../classes';
 // ----------------------------------------------------------------------
 
 export function SingleFilePreview({ file, sx, className, ...other }) {
+  if (!file) return null; 
   const fileName = typeof file === 'string' ? file : file.name;
-
+  
   const previewUrl = typeof file === 'string' ? file : URL.createObjectURL(file);
 
   return (

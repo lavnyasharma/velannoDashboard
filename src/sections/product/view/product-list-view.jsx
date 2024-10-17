@@ -1,17 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-
+import axios from 'axios';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import {
   DataGrid,
   gridClasses,
-  GridToolbarExport,
   GridActionsCellItem,
-  GridToolbarContainer,
-  GridToolbarQuickFilter,
-  GridToolbarFilterButton,
-  GridToolbarColumnsButton,
 } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
@@ -21,84 +15,78 @@ import { RouterLink } from 'src/routes/components';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSetState } from 'src/hooks/use-set-state';
 
-import { PRODUCT_STOCK_OPTIONS } from 'src/_mock';
-import { useGetProducts } from 'src/actions/product';
-import { DashboardContent } from 'src/layouts/dashboard';
-
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
-import { EmptyContent } from 'src/components/empty-content';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+import { DashboardContent } from 'src/layouts/dashboard';
+import { RenderCellMaterialProduct, RenderCellProduct } from '../product-table-row';
 
-import { ProductTableToolbar } from '../product-table-toolbar';
-import { ProductTableFiltersResult } from '../product-table-filters-result';
-import {
-  RenderCellStock,
-  RenderCellPrice,
-  RenderCellPublish,
-  RenderCellProduct,
-  RenderCellCreatedAt,
-} from '../product-table-row';
+// API details
+const API_URL = 'https://api.velonna.co/list/product/';
+const CSRF_TOKEN = 'nm9iD0EBxWmfYJfYyu7Q8zqAU6TLHqoUafu69uaEzAugYHKfuhBVXA8BrBZlhbbY';
 
 // ----------------------------------------------------------------------
 
-const PUBLISH_OPTIONS = [
-  { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' },
-];
-
 const HIDE_COLUMNS = { category: false };
-
-const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 
 // ----------------------------------------------------------------------
 
 export function ProductListView() {
   const confirmRows = useBoolean();
-
   const router = useRouter();
 
-  const { products, productsLoading } = useGetProducts();
-
-  const filters = useSetState({ publish: [], stock: [] });
-
   const [tableData, setTableData] = useState([]);
-
   const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10,
+  });
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]); // Default sorting
 
-  const [filterButtonEl, setFilterButtonEl] = useState(null);
+  // Fetch products from API
+  const fetchProducts = useCallback(async (page = 1, pageSize = 10) => {
+    setLoading(true);
+    try {
+      const offset = (page - 1) * pageSize;
+      const ordering = sortModel.length > 0 ? 
+        `${sortModel[0].sort === 'asc' ? '' : '-'}${sortModel[0].field}` : 'price'; // Sort based on sortModel
 
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState(HIDE_COLUMNS);
+      const response = await axios.get(API_URL, {
+        params: {
+          ordering,
+          limit: pageSize,
+          offset,
+        },
+        headers: {
+          accept: 'application/json',
+          'X-CSRFToken': CSRF_TOKEN,
+        },
+      });
+      const { results, count } = response.data;
+      setTableData(results);
+      setTotalProducts(count);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [sortModel]); // Add sortModel as a dependency
 
   useEffect(() => {
-    if (products.length) {
-      setTableData(products);
-    }
-  }, [products]);
-
-  const canReset = filters.state.publish.length > 0 || filters.state.stock.length > 0;
-
-  const dataFiltered = applyFilter({ inputData: tableData, filters: filters.state });
+    fetchProducts(paginationModel.page + 1, paginationModel.pageSize);
+  }, [fetchProducts, paginationModel]);
 
   const handleDeleteRow = useCallback(
     (id) => {
       const deleteRow = tableData.filter((row) => row.id !== id);
-
       toast.success('Delete success!');
-
       setTableData(deleteRow);
     },
     [tableData]
   );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !selectedRowIds.includes(row.id));
-
-    toast.success('Delete success!');
-
-    setTableData(deleteRows);
-  }, [selectedRowIds, tableData]);
 
   const handleEditRow = useCallback(
     (id) => {
@@ -114,25 +102,10 @@ export function ProductListView() {
     [router]
   );
 
-  const CustomToolbarCallback = useCallback(
-    () => (
-      <CustomToolbar
-        filters={filters}
-        canReset={canReset}
-        selectedRowIds={selectedRowIds}
-        setFilterButtonEl={setFilterButtonEl}
-        filteredResults={dataFiltered.length}
-        onOpenConfirmDeleteRows={confirmRows.onTrue}
-      />
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filters.state, selectedRowIds]
-  );
-
   const columns = [
-    { field: 'category', headerName: 'Category', filterable: false },
+    { field: 'hsn', headerName: 'Hsn', filterable: false },
     {
-      field: 'name',
+      field: 'title',
       headerName: 'Product',
       flex: 1,
       minWidth: 360,
@@ -142,34 +115,40 @@ export function ProductListView() {
       ),
     },
     {
-      field: 'createdAt',
-      headerName: 'Create at',
+      field: 'gross_weight',
+      headerName: 'Weight',
       width: 160,
-      renderCell: (params) => <RenderCellCreatedAt params={params} />,
+      // Sort by date
+      sortComparator: (v1, v2) => new Date(v1) - new Date(v2),
     },
     {
-      field: 'inventoryType',
-      headerName: 'Stock',
+      field: 'collection',
+      headerName: 'Collection',
       width: 160,
-      type: 'singleSelect',
-      valueOptions: PRODUCT_STOCK_OPTIONS,
-      renderCell: (params) => <RenderCellStock params={params} />,
+      // Sort by date
+      sortComparator: (v1, v2) => new Date(v1) - new Date(v2),
+    },
+    {
+      field: 'quantity',
+      headerName: 'Quantity',
+      width: 160,
+      // Sort by date
+      sortComparator: (v1, v2) => new Date(v1) - new Date(v2),
+    },
+    {
+      field: 'material',
+      headerName: 'Material',
+      width: 160,
+      renderCell: (params) => (
+        <RenderCellMaterialProduct params={params} onViewRow={() => handleViewRow(params.row.id)} />
+      ),
     },
     {
       field: 'price',
       headerName: 'Price',
       width: 140,
-      editable: true,
-      renderCell: (params) => <RenderCellPrice params={params} />,
-    },
-    {
-      field: 'publish',
-      headerName: 'Publish',
-      width: 110,
-      type: 'singleSelect',
-      editable: true,
-      valueOptions: PUBLISH_OPTIONS,
-      renderCell: (params) => <RenderCellPublish params={params} />,
+      // Sort by price
+      sortComparator: (v1, v2) => v1 - v2,
     },
     {
       type: 'actions',
@@ -188,29 +167,22 @@ export function ProductListView() {
           label="View"
           onClick={() => handleViewRow(params.row.id)}
         />,
-        <GridActionsCellItem
-          showInMenu
-          icon={<Iconify icon="solar:pen-bold" />}
-          label="Edit"
-          onClick={() => handleEditRow(params.row.id)}
-        />,
-        <GridActionsCellItem
-          showInMenu
-          icon={<Iconify icon="solar:trash-bin-trash-bold" />}
-          label="Delete"
-          onClick={() => {
-            handleDeleteRow(params.row.id);
-          }}
-          sx={{ color: 'error.main' }}
-        />,
+        // <GridActionsCellItem
+        //   showInMenu
+        //   icon={<Iconify icon="solar:pen-bold" />}
+        //   label="Edit"
+        //   onClick={() => handleEditRow(params.row.id)}
+        // />,
+        // <GridActionsCellItem
+        //   showInMenu
+        //   icon={<Iconify icon="solar:trash-bin-trash-bold" />}
+        //   label="Delete"
+        //   onClick={() => handleDeleteRow(params.row.id)}
+        //   sx={{ color: 'error.main' }}
+        // />,
       ],
     },
   ];
-
-  const getTogglableColumns = () =>
-    columns
-      .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
-      .map((column) => column.field);
 
   return (
     <>
@@ -246,25 +218,18 @@ export function ProductListView() {
           <DataGrid
             checkboxSelection
             disableRowSelectionOnClick
-            rows={dataFiltered}
+            rows={tableData}
             columns={columns}
-            loading={productsLoading}
+            loading={loading}
+            pageSize={paginationModel.pageSize}
+            rowCount={totalProducts}
+            paginationMode="server"
+            onPaginationModelChange={setPaginationModel}
+            sortModel={sortModel} // Add sort model to DataGrid
+            onSortModelChange={setSortModel} // Handle sort model changes
             getRowHeight={() => 'auto'}
             pageSizeOptions={[5, 10, 25]}
             initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
-            onRowSelectionModelChange={(newSelectionModel) => setSelectedRowIds(newSelectionModel)}
-            columnVisibilityModel={columnVisibilityModel}
-            onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
-            slots={{
-              toolbar: CustomToolbarCallback,
-              noRowsOverlay: () => <EmptyContent />,
-              noResultsOverlay: () => <EmptyContent title="No results found" />,
-            }}
-            slotProps={{
-              panel: { anchorEl: filterButtonEl },
-              toolbar: { setFilterButtonEl },
-              columnsManagement: { getTogglableColumns },
-            }}
             sx={{ [`& .${gridClasses.cell}`]: { alignItems: 'center', display: 'inline-flex' } }}
           />
         </Card>
@@ -276,7 +241,7 @@ export function ProductListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {selectedRowIds.length} </strong> items?
+            Are you sure you want to delete <strong>{selectedRowIds.length}</strong> items?
           </>
         }
         action={
@@ -284,7 +249,7 @@ export function ProductListView() {
             variant="contained"
             color="error"
             onClick={() => {
-              handleDeleteRows();
+              // Handle multiple row deletion
               confirmRows.onFalse();
             }}
           >
@@ -294,71 +259,4 @@ export function ProductListView() {
       />
     </>
   );
-}
-
-function CustomToolbar({
-  filters,
-  canReset,
-  selectedRowIds,
-  filteredResults,
-  setFilterButtonEl,
-  onOpenConfirmDeleteRows,
-}) {
-  return (
-    <>
-      <GridToolbarContainer>
-        <ProductTableToolbar
-          filters={filters}
-          options={{ stocks: PRODUCT_STOCK_OPTIONS, publishs: PUBLISH_OPTIONS }}
-        />
-
-        <GridToolbarQuickFilter />
-
-        <Stack
-          spacing={1}
-          flexGrow={1}
-          direction="row"
-          alignItems="center"
-          justifyContent="flex-end"
-        >
-          {!!selectedRowIds.length && (
-            <Button
-              size="small"
-              color="error"
-              startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
-              onClick={onOpenConfirmDeleteRows}
-            >
-              Delete ({selectedRowIds.length})
-            </Button>
-          )}
-
-          <GridToolbarColumnsButton />
-          <GridToolbarFilterButton ref={setFilterButtonEl} />
-          <GridToolbarExport />
-        </Stack>
-      </GridToolbarContainer>
-
-      {canReset && (
-        <ProductTableFiltersResult
-          filters={filters}
-          totalResults={filteredResults}
-          sx={{ p: 2.5, pt: 0 }}
-        />
-      )}
-    </>
-  );
-}
-
-function applyFilter({ inputData, filters }) {
-  const { stock, publish } = filters;
-
-  if (stock.length) {
-    inputData = inputData.filter((product) => stock.includes(product.inventoryType));
-  }
-
-  if (publish.length) {
-    inputData = inputData.filter((product) => publish.includes(product.publish));
-  }
-
-  return inputData;
 }
