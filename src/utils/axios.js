@@ -14,7 +14,7 @@ axiosInstance.interceptors.response.use(
 export default axiosInstance;
 
 // ----------------------------------------------------------------------
-console.log("1")
+
 export const fetcher = async (args) => {
   try {
     const [url, config] = Array.isArray(args) ? args : [args];
