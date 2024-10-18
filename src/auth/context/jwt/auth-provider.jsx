@@ -37,7 +37,8 @@ export function AuthProvider({ children }) {
             },
           });
 
-          const { user, role } = res.data;
+          const { user, role,email,first_name,last_name,profile_picture } = res.data;
+          console.log(email)
           if (role === "customer") {
             toast.error("You are not authorized to access this resource ")
 
@@ -49,8 +50,8 @@ export function AuthProvider({ children }) {
             localStorage.setItem("role", role)
           }
 
-
-          setState({ user: { ...user, accessToken,role }, loading: false });
+          console.log(user)
+          setState({ user: { ...user, accessToken,role,email,username,first_name,last_name,profile_picture }, loading: false });
         } else {
           console.error("Username not found in localStorage");
           setState({ user: null, loading: false });

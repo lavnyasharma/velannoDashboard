@@ -43,6 +43,7 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
         name: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).name?JSON.parse(localStorage.getItem('userData')).name:"":"",
         email: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).email?JSON.parse(localStorage.getItem('userData')).email:"":"",
         phone: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).phone?JSON.parse(localStorage.getItem('userData')).phone:"":"",
+        paymentMethod: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).paymentMethod?JSON.parse(localStorage.getItem('userData')).paymentMethod:"":"",
       })
       .then(async (res) => {
         toast.success('Order Created');

@@ -82,6 +82,7 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
       <TableCell align="center"> {row.items.length} </TableCell>
 
       <TableCell> {fCurrency(row.items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
+      <TableCell> {row.payment_method?row?.payment_method.toUpperCase():""} </TableCell>
 
       
     </TableRow>

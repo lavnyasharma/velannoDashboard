@@ -8,7 +8,7 @@ import { LoadingScreen } from 'src/components/loading-screen';
 
 import { AuthGuard } from 'src/auth/guard';
 // import { SearchByHsn } from 'src/sections/search/view/order-details-view';
-import { SearchByHsnList } from 'src/sections/search/view/order-list-view';
+import { SearchByHsnList } from 'src/sections/billing/view/order-list-view';
 
 // ----------------------------------------------------------------------
 

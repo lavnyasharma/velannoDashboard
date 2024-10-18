@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Scrollbar } from 'src/components/scrollbar';
-import { Table, TableBody, TableRow, TableCell } from '@mui/material';
+import { Table, TableBody, TableRow, TableCell, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
 import { TableHeadCustom } from 'src/components/table';
 import { toast } from 'src/components/snackbar';
 import axiosInstance from 'src/utils/axios';
@@ -206,39 +206,55 @@ export function SearchByHsnList() {
 
       {/* Modal for User Info */}
       <Modal open={openModal} onClose={handleCloseModal}>
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, boxShadow: 24, width: 400 }}>
-          <h2>Enter your details</h2>
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Name"
-            value={userData.name}
-            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Email"
-            value={userData.email}
-            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Phone Number"
-            value={userData.phone}
-            onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-            <Button onClick={handleCloseModal} sx={{ mr: 1 }}>
-              Cancel
-            </Button>
-            <Button variant="contained" onClick={handleOrderSubmission}>
-              Submit
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+  <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, boxShadow: 24, width: 400 }}>
+    <h2>Enter Customer details</h2>
+    <TextField
+      fullWidth
+      margin="normal"
+      label="Name"
+      value={userData.name}
+      onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+    />
+    <TextField
+      fullWidth
+      margin="normal"
+      label="Email"
+      value={userData.email}
+      onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+    />
+    <TextField
+      fullWidth
+      margin="normal"
+      label="Phone Number"
+      value={userData.phone}
+      onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+    />
+    
+    <FormControl fullWidth margin="normal">
+      <InputLabel>Payment Method</InputLabel>
+      <Select
+        value={userData.paymentMethod}
+        label="Payment Method"
+        onChange={(e) => setUserData({ ...userData, paymentMethod: e.target.value })}
+      >
+        <MenuItem value="upi">UPI</MenuItem>
+        <MenuItem value="cash">Cash</MenuItem>
+        <MenuItem value="netbanking">Net Banking</MenuItem>
+        <MenuItem value="card">Card</MenuItem>
+        <MenuItem value="other">Other</MenuItem>
+      </Select>
+    </FormControl>
+
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+      <Button onClick={handleCloseModal} sx={{ mr: 1 }}>
+        Cancel
+      </Button>
+      <Button variant="contained" onClick={handleOrderSubmission}>
+        Submit
+      </Button>
+    </Box>
+  </Box>
+</Modal>
     </>
   );
 }

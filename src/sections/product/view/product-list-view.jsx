@@ -17,6 +17,7 @@ import { RouterLink } from 'src/routes/components';
 
 import { useBoolean } from 'src/hooks/use-boolean';
 import { useSetState } from 'src/hooks/use-set-state';
+import { fCurrency } from 'src/utils/format-number';
 
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
@@ -291,22 +292,22 @@ export function ProductListView() {
                             {category.category__name.charAt(0).toUpperCase() + category.category__name.slice(1)}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            <strong>Total Items Left:</strong> {category.total_left}
+                            <strong>TL(Items):</strong> {category.total_left}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            <strong>Total Items Assigned:</strong> {category.total_assigned}
+                            <strong>TA(Items):</strong> {category.total_assigned}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            <strong>Total Price Left:</strong> ₹{category.total_price_left.toLocaleString()}
+                            <strong>TL(Price):</strong> {fCurrency(category.total_price_left)}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            <strong>Total Price Assigned:</strong> ₹{category.total_price_assigned.toLocaleString()}
+                            <strong>TA(Price):</strong> ₹{fCurrency(category.total_price_assigned)}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            <strong>Total Weight Left:</strong> {category.total_weight_left}g
+                            <strong>TL(Weight):</strong> {category.total_weight_left}g
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            <strong>Total Weight Assigned:</strong> {category.total_weight_assigned}g
+                            <strong>TA(Weight):</strong> {category.total_weight_assigned}g
                           </Typography>
                         </Box>
                       </Card>

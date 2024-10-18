@@ -87,7 +87,7 @@ export const navData = [
             icon: ICONS.product,
             children: [
               { title: 'List', path: paths.dashboard.product.root, roles: ['admin','counter'] },
-              { title: 'Details', path: paths.dashboard.product.demo.details, roles: ['admin','counter'] },
+              { title: 'Details', path: paths.dashboard.product.demo.details, roles: ['admin'] },
               { title: 'Create', path: paths.dashboard.product.new ,roles: ['admin']},
               { title: 'Edit', path: paths.dashboard.product.demo.edit ,roles: ['admin']},
     
@@ -100,7 +100,6 @@ export const navData = [
             icon: ICONS.order,
             children: [
               { title: 'List', path: paths.dashboard.order.root, roles: ['admin', 'counter'] },
-              { title: 'Details', path: paths.dashboard.order.demo.details, roles: ['admin', 'counter'] },
             ],
             roles: ['admin', 'counter'],
           },

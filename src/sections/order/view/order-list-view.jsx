@@ -42,6 +42,8 @@ const TABLE_HEAD = [
   { id: 'createdAt', label: 'Date', width: 140 },
   { id: 'totalQuantity', label: 'Items', width: 120, align: 'center' },
   { id: 'totalAmount', label: 'Price', width: 140 },
+  { id: 'paymentmethod', label: 'Payment Method', width: 140 },
+
 ];
 
 export function OrderListView() {
