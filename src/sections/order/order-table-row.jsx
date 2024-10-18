@@ -26,7 +26,6 @@ import { usePopover, CustomPopover } from 'src/components/custom-popover';
 // ----------------------------------------------------------------------
 
 export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteRow }) {
-  console.log(row)
   const confirm = useBoolean();
 
   const collapse = useBoolean();

@@ -46,14 +46,10 @@ export function JwtSignInView() {
 
   const password = useBoolean();
 
-  const defaultValues = {
-    username: 'architprasar',
-    password: '26@Prasar',
-  };
+  
 
   const methods = useForm({
     resolver: zodResolver(SignInSchema),
-    defaultValues,
   });
 
   const {

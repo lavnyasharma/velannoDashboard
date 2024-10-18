@@ -1,6 +1,9 @@
 import { useMemo, useEffect, useCallback } from 'react';
 
 import { useSetState } from 'src/hooks/use-set-state';
+import { toast } from 'sonner';
+import { signOut } from 'firebase/auth';
+
 
 import axios, { endpoints } from 'src/utils/axios';
 
@@ -19,13 +22,13 @@ export function AuthProvider({ children }) {
   const checkUserSession = useCallback(async () => {
     try {
       const accessToken = sessionStorage.getItem(STORAGE_KEY);
-  
+
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
-  
+
         // Correct method to retrieve username from localStorage
         const username = localStorage.getItem('username');
-  
+
         if (username) {
           // Make API call with username and accessToken
           const res = await axios.get(`${endpoints.auth.me}${username}`, {
@@ -33,10 +36,21 @@ export function AuthProvider({ children }) {
               Authorization: `Bearer ${accessToken}`, // Pass the token in the Authorization header
             },
           });
-  
-          const { user } = res.data;
-  
-          setState({ user: { ...user, accessToken }, loading: false });
+
+          const { user, role } = res.data;
+          if (role === "customer") {
+            toast.error("You are not authorized to access this resource ")
+
+            localStorage.removeItem("username")
+            await signOut()
+
+          }
+          else {
+            localStorage.setItem("role", role)
+          }
+
+
+          setState({ user: { ...user, accessToken,role }, loading: false });
         } else {
           console.error("Username not found in localStorage");
           setState({ user: null, loading: false });
@@ -49,7 +63,7 @@ export function AuthProvider({ children }) {
       setState({ user: null, loading: false });
     }
   }, [setState]);
-  
+
 
   useEffect(() => {
     checkUserSession();
@@ -66,9 +80,9 @@ export function AuthProvider({ children }) {
     () => ({
       user: state.user
         ? {
-            ...state.user,
-            role: state.user?.role ?? 'admin',
-          }
+          ...state.user,
+          role: state.user?.role ?? 'admin',
+        }
         : null,
       checkUserSession,
       loading: status === 'loading',
@@ -77,6 +91,7 @@ export function AuthProvider({ children }) {
     }),
     [checkUserSession, state.user, status]
   );
+  console.log(memoizedValue)
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
 }

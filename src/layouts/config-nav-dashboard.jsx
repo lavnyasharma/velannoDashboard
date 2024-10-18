@@ -76,32 +76,42 @@ export const navData = [
       //     { title: 'Account', path: paths.dashboard.user.account },
       //   ],
       // },
-      {
-        title: 'Product',
-        path: paths.dashboard.product.root,
-        icon: ICONS.product,
-        children: [
-          { title: 'List', path: paths.dashboard.product.root },
-          { title: 'Details', path: paths.dashboard.product.demo.details },
-          { title: 'Create', path: paths.dashboard.product.new },
-          { title: 'Edit', path: paths.dashboard.product.demo.edit },
-        ],
-      },
-      {
-        title: 'Order',
-        path: paths.dashboard.order.root,
-        icon: ICONS.order,
-        children: [
-          { title: 'List', path: paths.dashboard.order.root },
-          { title: 'Details', path: paths.dashboard.order.demo.details },
-        ],
-      },
-      {
-        title: 'Billing',
-        path: paths.dashboard.search.root,
-        icon:  ICONS.invoice,
+      
+      /**
+       * Management
+       */
+     
+          {
+            title: 'Product',
+            path: paths.dashboard.product.root,
+            icon: ICONS.product,
+            children: [
+              { title: 'List', path: paths.dashboard.product.root, roles: ['admin','counter'] },
+              { title: 'Details', path: paths.dashboard.product.demo.details, roles: ['admin','counter'] },
+              { title: 'Create', path: paths.dashboard.product.new ,roles: ['admin']},
+              { title: 'Edit', path: paths.dashboard.product.demo.edit ,roles: ['admin']},
+    
+            ],
+            roles: ['admin', 'counter'],
+          },
+          {
+            title: 'Order',
+            path: paths.dashboard.order.root,
+            icon: ICONS.order,
+            children: [
+              { title: 'List', path: paths.dashboard.order.root, roles: ['admin', 'counter'] },
+              { title: 'Details', path: paths.dashboard.order.demo.details, roles: ['admin', 'counter'] },
+            ],
+            roles: ['admin', 'counter'],
+          },
+          {
+            title: 'Billing',
+            path: paths.dashboard.search.root,
+            icon: ICONS.invoice,
+            roles: ['admin',"counter"],
+          },
         
-      },
+      
       // {
       //   title: 'Invoice',
       //   path: paths.dashboard.invoice.root,

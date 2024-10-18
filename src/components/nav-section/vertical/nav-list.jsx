@@ -76,7 +76,7 @@ export function NavList({ data, render, depth, slotProps, enabledRootRedirect })
           },
         }}
       >
-        {renderNavItem}
+        {data.roles?data?.roles.includes(localStorage.getItem("role"))?renderNavItem:"":renderNavItem}
 
         <NavCollapse data-group={data.title} in={openMenu} depth={depth} unmountOnExit mountOnEnter>
           <NavSubList
@@ -101,14 +101,22 @@ function NavSubList({ data, render, depth, slotProps, enabledRootRedirect }) {
   return (
     <NavUl sx={{ gap: 'var(--nav-item-gap)' }}>
       {data.map((list) => (
-        <NavList
+        list?.roles?list?.roles.includes(localStorage.getItem("role"))?<NavList
           key={list.title}
           data={list}
           render={render}
+          role={localStorage.getItem("role")}
           depth={depth + 1}
           slotProps={slotProps}
           enabledRootRedirect={enabledRootRedirect}
-        />
+        />:"":<NavList
+        key={list.title}
+        data={list}
+        render={render}
+        depth={depth + 1}
+        slotProps={slotProps}
+        enabledRootRedirect={enabledRootRedirect}
+      />
       ))}
     </NavUl>
   );

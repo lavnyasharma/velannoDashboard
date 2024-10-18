@@ -1,147 +1,154 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://swvbrjjgflgqbkbpghjw.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dmJyampnZmxncWJrYnBnaGp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQ5MzgwODMsImV4cCI6MjA0MDUxNDA4M30.zqoFhMqAGBQ6yDh1ZwEnTy_omTaOo0GOQXlPKo-RG_U'; // Use the correct key
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-async function getProducts() {
-    const { data, error } = await supabase
-        .from('products')
-        .select('*');
-
-    if (error) {
-        console.error('Error fetching products:', error);
-        return [];
-    }
-
-    return data;
-}
-function mapProductToApiFormat(product) {
-    return {
-        seller: 'velonna', // This will be static or dynamic based on your logic
-        category: mapCategory(product.category), // Example: You might need a function to map category strings to IDs
-        hsn: parseInt(product.hsn, 10),
-        title: product.name,
-        price: product.price.toString(),
-        material: product.material || '',
-        gender: null, // Adjust based on your data if available
-        age: null, // Adjust based on your data if available
-        is_live: true, // Or any logic based on product availability
-        quantity: 2147483647, // Adjust based on stock or any relevant field
-        size: product.size || '',
-        description: product.description || '',
-        gross_weight: product.weight || 0,
-        net_weight: product.weight || 0,
-        diamond_weight: product.diamond_weight || 0,
-        kt: product.kt || '',
-        diamond_clearity: '', // Adjust if available
-        is_gold: product.kt == 14 ? true : false,
-        is_diamond: product.kt == 14 ? true : false,
-        for_counter:product.slct_for_counter
-    };
-}
-
-function mapCategory(category) {
-    const categoryMap = {
-        'ring': 3,
-        'bracelet': 4,
-        'chains': 5,
-        'necklace': 6,
-        'set': 7,
-        'necklace set ring and bracelet': 8,
-        'earring': 9,
-        'bangles': 10,
-        'anklet': 11,
-        'studs': 12,
-        'pendant set': 13,
-        'chain pendant': 14,
-        'chain pendant set': 15,
-        'hoops': 16,
-        'pendant': 17,
-        'necklace set': 18
-    };
-
-    // Strip leading/trailing spaces and map the category
-    return categoryMap[category.trim().toLowerCase()] || 0; // Default to 0 if category not found
-}
-
-function mapCollection(collection) {
-    const collectionMap = {
-        'eclipse': 3,
-        'cascade': 4,
-        'embrace': 5,
-        'chromatic': 6,
-        'blush': 7,
-        'regalia': 8,
-        'crowns': 9,
-        'bands': 11,
-        'strings': 12,
-        'celestial sphere': 13,
-        'wild wristlets': 14,
-        'eternity': 15,
-        'charms': 16,
-        'lunar': 17,
-        'minimal': 18,
-        'negligee': 19,
-        'sautoir': 20,
-        'torsade': 21,
-        'hoops': 22,
-        'drop earrings': 23,
-        'charm drops': 24,
-        'artistic accents': 25,
-        'tiny treasures': 26,
-        'mini eclipse': 27,
-        'sweet charms': 28,
-        'flare': 29,
-        'lilac': 30,
-        'solitaire': 31,
-        'amethyst': 32,
-        'myriad': 33,
-        'coven': 34,
-        'lavender': 35,
-        'serenity': 36,
-        'elegance': 37,
-        'willow': 38,
-        'harmony duet': 39,
-        'moon light': 40,
-        "shrimm's authentic": 41,
-        'dazzle': 42,
-        'enigma': 43,
-        'allure': 44,
-        'cherie': 45,
-        'brilliance': 46,
-        'beads': 47
-    };
-
-    // Strip leading/trailing spaces and map the collection
-    return collectionMap[collection.trim().toLowerCase()] || 0; // Default to 0 if collection not found
-}
-
-
-async function sendProductToApi(product, token) {
-    const apiUrl = 'https://your-api-url.com/products';
-    const apiData = mapProductToApiFormat(product);
-
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Add Bearer token for authentication
+{
+    "total_summary": {
+        "total_assigned": 317,
+        "total_left": 259,
+        "total_weight_left": 3548.065,
+        "total_price_left": 9661354.0,
+        "total_weight_assigned": 3999.995,
+        "total_price_assigned": 11086860.0
+    },
+    "category_summary": [
+        {
+            "category__name": "necklace set ring and bracelet",
+            "total_left": 3,
+            "total_weight_left": 322.9,
+            "total_price_left": 132389.0,
+            "total_assigned": 4,
+            "total_weight_assigned": 352.5,
+            "total_price_assigned": 144525.0
         },
-        body: JSON.stringify(apiData)
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error sending product to API:', errorData);
-        return null;
+        {
+            "category__name": "necklace",
+            "total_left": 5,
+            "total_weight_left": 110.3,
+            "total_price_left": 367284.0,
+            "total_assigned": 5,
+            "total_weight_assigned": 110.3,
+            "total_price_assigned": 367284.0
+        },
+        {
+            "category__name": "pendant",
+            "total_left": 4,
+            "total_weight_left": 13.06,
+            "total_price_left": 346003.0,
+            "total_assigned": 4,
+            "total_weight_assigned": 13.06,
+            "total_price_assigned": 346003.0
+        },
+        {
+            "category__name": "pendant set",
+            "total_left": 1,
+            "total_weight_left": 23.45,
+            "total_price_left": 9380.0,
+            "total_assigned": 1,
+            "total_weight_assigned": 23.45,
+            "total_price_assigned": 9380.0
+        },
+        {
+            "category__name": "ring",
+            "total_left": 113,
+            "total_weight_left": 498.905,
+            "total_price_left": 4157333.0,
+            "total_assigned": 134,
+            "total_weight_assigned": 605.015,
+            "total_price_assigned": 4521618.0
+        },
+        {
+            "category__name": "set",
+            "total_left": 4,
+            "total_weight_left": 101.0,
+            "total_price_left": 356894.0,
+            "total_assigned": 6,
+            "total_weight_assigned": 145.67,
+            "total_price_assigned": 378255.0
+        },
+        {
+            "category__name": "necklace set",
+            "total_left": 7,
+            "total_weight_left": 453.48,
+            "total_price_left": 200680.0,
+            "total_assigned": 7,
+            "total_weight_assigned": 453.48,
+            "total_price_assigned": 200680.0
+        },
+        {
+            "category__name": "chain pendant",
+            "total_left": 11,
+            "total_weight_left": 335.53,
+            "total_price_left": 154152.0,
+            "total_assigned": 14,
+            "total_weight_assigned": 349.62,
+            "total_price_assigned": 161952.0
+        },
+        {
+            "category__name": "bangles",
+            "total_left": 4,
+            "total_weight_left": 294.71,
+            "total_price_left": 132619.0,
+            "total_assigned": 4,
+            "total_weight_assigned": 294.71,
+            "total_price_assigned": 132619.0
+        },
+        {
+            "category__name": "anklet",
+            "total_left": 9,
+            "total_weight_left": 180.17,
+            "total_price_left": 46337.0,
+            "total_assigned": 12,
+            "total_weight_assigned": 206.8,
+            "total_price_assigned": 54024.0
+        },
+        {
+            "category__name": "chain pendant set",
+            "total_left": 4,
+            "total_weight_left": 89.81,
+            "total_price_left": 41040.0,
+            "total_assigned": 6,
+            "total_weight_assigned": 107.58,
+            "total_price_assigned": 49540.0
+        },
+        {
+            "category__name": "chains",
+            "total_left": 21,
+            "total_weight_left": 320.39,
+            "total_price_left": 292843.0,
+            "total_assigned": 26,
+            "total_weight_assigned": 364.89,
+            "total_price_assigned": 304717.0
+        },
+        {
+            "category__name": "earring",
+            "total_left": 45,
+            "total_weight_left": 296.78,
+            "total_price_left": 1948696.0,
+            "total_assigned": 60,
+            "total_weight_assigned": 386.45,
+            "total_price_assigned": 2225402.0
+        },
+        {
+            "category__name": "bracelet",
+            "total_left": 28,
+            "total_weight_left": 507.58,
+            "total_price_left": 1475704.0,
+            "total_assigned": 34,
+            "total_weight_assigned": 586.47,
+            "total_price_assigned": 2190861.0
+        }
+    ],
+    "diamond_products": {
+        "total_assigned": 68,
+        "total_left": 62,
+        "total_weight_left": 392.765,
+        "total_price_left": 8353203.0,
+        "total_weight_assigned": 448.345,
+        "total_price_assigned": 9598314.0
+    },
+    "silver_products": {
+        "total_assigned": 249,
+        "total_left": 197,
+        "total_weight_left": 3155.3,
+        "total_price_left": 1308151.0,
+        "total_weight_assigned": 3551.65,
+        "total_price_assigned": 1488546.0
     }
-
-    const responseData = await response.json();
-    return responseData;
 }
-
-
-
-console.log(getProducts())
-// sendProductToApi();

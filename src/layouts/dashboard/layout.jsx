@@ -92,6 +92,7 @@ export function DashboardLayout({ sx, children, header, data }) {
                 data={navData}
                 layoutQuery={layoutQuery}
                 cssVars={navColorVars.section}
+                slotProps={{currentRole:localStorage.getItem("role")}}
               />
             ) : null,
             leftArea: (
@@ -110,6 +111,7 @@ export function DashboardLayout({ sx, children, header, data }) {
                   open={mobileNavOpen.value}
                   onClose={mobileNavOpen.onFalse}
                   cssVars={navColorVars.section}
+                  slotProps={{currentRole:localStorage.getItem("role")}}
                 />
                 {/* -- Logo -- */}
                 {isNavHorizontal && (
@@ -166,6 +168,7 @@ export function DashboardLayout({ sx, children, header, data }) {
             isNavMini={isNavMini}
             layoutQuery={layoutQuery}
             cssVars={navColorVars.section}
+            slotProps={{currentRole:localStorage.getItem("role")}}
             onToggleNav={() =>
               settings.onUpdateField(
                 'navLayout',

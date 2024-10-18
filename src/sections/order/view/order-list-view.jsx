@@ -1,140 +1,137 @@
-import { useState,useEffect, useCallback } from 'react';
-
-import Tab from '@mui/material/Tab';
+import { useState, useEffect, useCallback } from 'react';
 import Box from '@mui/material/Box';
-import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
 import axiosInstance from 'src/utils/axios';
-
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
-
 import { useBoolean } from 'src/hooks/use-boolean';
-import { useSetState } from 'src/hooks/use-set-state';
-
-import { fIsAfter, fIsBetween } from 'src/utils/format-time';
-
-import { varAlpha } from 'src/theme/styles';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { _orders, ORDER_STATUS_OPTIONS } from 'src/_mock';
-
-import { Label } from 'src/components/label';
 import { toast } from 'src/components/snackbar';
-import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import Typography from '@mui/material/Typography';
+
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+
 import {
   useTable,
-  emptyRows,
-  rowInPage,
   TableNoData,
-  getComparator,
-  TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from 'src/components/table';
+import { useTheme } from '@emotion/react';
+import { LoadingIcon } from 'yet-another-react-lightbox';
+
+
+import { Divider, Stack,Grid } from '@mui/material';
+import { GridExpandMoreIcon } from '@mui/x-data-grid';
 
 import { OrderTableRow } from '../order-table-row';
-import { OrderTableToolbar } from '../order-table-toolbar';
-import { OrderTableFiltersResult } from '../order-table-filters-result';
-
-// ----------------------------------------------------------------------
-
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...ORDER_STATUS_OPTIONS];
-
+import { OrderAnalytic } from '../order-analytics';
 
 const TABLE_HEAD = [
   { id: 'orderNumber', label: 'Order', width: 88 },
   { id: 'name', label: 'Customer' },
   { id: 'createdAt', label: 'Date', width: 140 },
-  {
-    id: 'totalQuantity',
-    label: 'Items',
-    width: 120,
-    align: 'center',
-  },
+  { id: 'totalQuantity', label: 'Items', width: 120, align: 'center' },
   { id: 'totalAmount', label: 'Price', width: 140 },
-  // { id: 'status', label: 'Status', width: 110 },
-  // { id: '', width: 88 },
 ];
 
-// ----------------------------------------------------------------------
-
 export function OrderListView() {
-  const [listData, setlistData] = useState([]);
-  const table = useTable({ defaultOrderBy: 'orderNumber' });
+  const [listData, setListData] = useState([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const theme = useTheme();
+
+  const [summaryData, setSummaryData] = useState({})
+
+  const table = useTable({
+    defaultOrderBy: 'hsn',
+    defaultRowsPerPage: rowsPerPage,
+  });
 
   const router = useRouter();
-
   const confirm = useBoolean();
 
-  const [tableData, setTableData] = useState(_orders);
+  const getListData = useCallback(async (limit, offset) => {
+    setLoading(true);
+    try {
+      const params = {
+        limit,
+        offset,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+      };
 
-  const filters = useSetState({
-    id:"",
-  });
+      const { data } = await axiosInstance.get('https://api.velonna.co/order-lists/', { params });
+      setListData(data.results);
+      setTotalRows(data.count);
+    } catch (error) {
+      toast.error('Error fetching orders');
+    }
+    setLoading(false);
+  }, [startDate, endDate]);
 
-  const getListData = async () => {
-    const resp = await axiosInstance.get('https://api.velonna.co/order-lists/').then((res) => {
-      console.log(res.data.results);
-      setlistData(res.data.results);
-    });
-  };
+
+  const getSummaryData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+      };
+
+      const { data } = await axiosInstance.get('https://api.velonna.co/order/summary/seller/', { params });
+      console.log(data)
+      setSummaryData(data);
+
+    } catch (error) {
+      toast.error('Error fetching orders');
+    }
+    setLoading(false);
+  }, [startDate, endDate]);
+
   useEffect(() => {
-    // if (listData.length === 0) {
-      getListData();
-    // }
-  }, []);
-  const dateError = fIsAfter(filters.state.startDate, filters.state.endDate);
+    getListData(rowsPerPage, page * rowsPerPage);
+    getSummaryData()
+  }, [getListData, getSummaryData, page, rowsPerPage]);
 
-  const dataFiltered = applyFilter({
-    inputData: listData,
-    comparator: getComparator(table.order, table.orderBy),
-    filters: filters.state,
-    dateError,
-  });
+  const handlePageChange = (event, newPage) => {
+    setPage(newPage);
+  };
 
-  const dataInPage = rowInPage(listData, table.page, table.rowsPerPage);
+  const handleRowsPerPageChange = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+  };
 
-  const canReset =
-    !!filters.state.name ||
-    filters.state.status !== 'all' ||
-    (!!filters.state.startDate && !!filters.state.endDate);
+  const handleDateChange = (event, isStart) => {
+    const date = event.target.value;
+    if (isStart) {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
+    setPage(0);
+  };
 
-  const notFound = (!listData.length && canReset) || !listData.length;
-
-  const handleDeleteRow = useCallback(
-    (id) => {
-      const deleteRow = tableData.filter((row) => row.id !== id);
-
-      toast.success('Delete success!');
-
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
-    },
-    [dataInPage.length, table, tableData]
-  );
-
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id));
-
-    toast.success('Delete success!');
-
-    setTableData(deleteRows);
-
-    table.onUpdatePageDeleteRows({
-      totalRowsInPage: dataInPage.length,
-      totalRowsFiltered: dataFiltered.length,
-    });
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleResetFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setPage(0);
+  };
 
   const handleViewRow = useCallback(
     (id) => {
@@ -143,156 +140,171 @@ export function OrderListView() {
     [router]
   );
 
-  const handleFilterStatus = useCallback(
-    (event, newValue) => {
-      table.onResetPage();
-      filters.setState({ status: newValue });
-    },
-    [filters, table]
-  );
-
   return (
-    <>
-     {listData.length !==0? <DashboardContent>
-        <CustomBreadcrumbs
-          heading="List"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Order', href: paths.dashboard.order.root },
-            { name: 'List' },
-          ]}
-          sx={{ mb: { xs: 3, md: 5 } }}
-        />
+    <DashboardContent>
+      <CustomBreadcrumbs
+        heading="List"
+        links={[
+          { name: 'Dashboard', href: paths.dashboard.root },
+          { name: 'Order', href: paths.dashboard.order.root },
+          { name: 'List' },
+        ]}
+        sx={{ mb: { xs: 3, md: 5 } }}
+      />
 
-        <Card>
-          {/* <Tabs
-            value={filters.state.status}
-            onChange={handleFilterStatus}
-            sx={{
-              px: 2.5,
-              boxShadow: (theme) =>
-                `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
-            }}
+      {Object.keys(summaryData).length !== 0 ? <Card sx={{ mb: { xs: 3, md: 5 } }}>
+        <Scrollbar sx={{ minHeight: 108 }}>
+          <Stack
+            direction="row"
+            divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
+            sx={{ py: 2 }}
           >
-            {STATUS_OPTIONS.map((tab) => (
-              <Tab
-                key={tab.value}
-                iconPosition="end"
-                value={tab.value}
-                label={tab.label}
-                icon={
-                  <Label
-                    variant={
-                      ((tab.value === 'all' || tab.value === filters.state.status) && 'filled') ||
-                      'soft'
-                    }
-                    color={
-                      (tab.value === 'completed' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'cancelled' && 'error') ||
-                      'default'
-                    }
-                  >
-                    {['completed', 'pending', 'cancelled', 'refunded'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
-                      : tableData.length}
-                  </Label>
-                }
-              />
-            ))}
-          </Tabs> */}
-
-          {/* <OrderTableToolbar
-            filters={filters}
-            onResetPage={table.onResetPage}
-            dateError={dateError}
-          /> */}
-
-          {/* {canReset && (
-            <OrderTableFiltersResult
-              filters={filters}
-              totalResults={dataFiltered.length}
-              onResetPage={table.onResetPage}
-              sx={{ p: 2.5, pt: 0 }}
+            <OrderAnalytic
+              title="Total"
+              total={summaryData?.total_sales_summary?.total_sales}
+              percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_sales_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
+              weight={summaryData?.total_sales_summary?.total_weight}
+              price={summaryData?.total_sales_summary?.total_price}
+              icon="solar:bill-list-bold-duotone"
+              color={theme.vars.palette.info.main}
             />
-          )} */}
 
-          <Box sx={{ position: 'relative' }}>
-            {/* <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={dataFiltered.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  dataFiltered.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={confirm.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
-            /> */}
+            <OrderAnalytic
+              title="Diamond"
+              total={summaryData?.diamond_sales?.total_sales}
+              percent={(((summaryData?.total_diamond ?? 0) - (summaryData?.diamond_sales?.total_sales ?? 0)) / (summaryData?.total_diamond ?? 1)) * 100}
+              weight={summaryData?.diamond_sales?.total_weight}
+              price={summaryData?.diamond_sales?.total_price}
+              icon="material-symbols:diamond"
+              color={theme.vars.palette.success.main}
+            />
 
-            <Scrollbar sx={{ minHeight: 444 }}>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headLabel={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id)
-                    )
-                  }
-                />
+            <OrderAnalytic
+              title="silver"
+              total={summaryData?.silver_sales?.total_sales}
+              percent={(((summaryData?.total_silver ?? 0) - (summaryData?.silver_sales?.total_sales ?? 0)) / (summaryData?.total_silver ?? 1)) * 100}
+              weight={summaryData?.silver_sales?.total_weight}
+              price={summaryData?.silver_sales?.total_price}
+              icon="mdi:podium-silver"
+              color={theme.vars.palette.warning.main}
+            />
 
-                <TableBody>
-                 {listData
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
+
+
+          </Stack>
+        </Scrollbar>
+      </Card> : ""}
+      <Card  sx={{ mb: { xs: 3, md: 5 } }}>
+        <Accordion defaultExpanded>
+          <AccordionSummary
+            expandIcon={<GridExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography variant="h6">Category wise Sales</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Scrollbar  sx={{ minHeight: 500 }}>
+              <Grid container spacing={3} padding={5}>
+                {summaryData?.category_sales?.map((category) => (
+                  <Grid item xs={12}  sm={6} md={4} key={category.product__category__name}>
+                    <Card>
+                      <Box sx={{ p: 2 }}>
+                        <Typography variant="subtitle1" gutterBottom>
+                        {category.product__category__name.charAt(0).toUpperCase() + category.product__category__name.slice(1)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Total Sold:</strong> {category.total_sold}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Total Price:</strong> ₹{category.total_price.toLocaleString()}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Total Weight:</strong> {category.total_weight}g
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </Scrollbar>
+          </AccordionDetails>
+        </Accordion>
+      </Card>
+
+      <Card>
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <TextField
+              label="Start Date"
+              type="date"
+              value={startDate}
+              onChange={(e) => handleDateChange(e, true)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+            <TextField
+              label="End Date"
+              type="date"
+              value={endDate}
+              onChange={(e) => handleDateChange(e, false)}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+          </Box>
+          <Button variant="outlined" onClick={handleResetFilters}>
+            Reset Filters
+          </Button>
+        </Box>
+
+        <Box sx={{ position: 'relative' }}>
+          {loading ? (
+            <LoadingIcon />
+          ) : (
+            <>
+              <Scrollbar sx={{ minHeight: 444 }}>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headLabel={TABLE_HEAD}
+                    rowCount={listData.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(checked, listData.map((row) => row.id))
+                    }
+                  />
+                  <TableBody>
+                    {listData.map((row) => (
                       <OrderTableRow
                         key={row.id}
                         row={row}
                         selected={table.selected.includes(row.id)}
                         onSelectRow={() => table.onSelectRow(row.id)}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
                         onViewRow={() => handleViewRow(row.id)}
                       />
-                    ))} 
+                    ))}
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                  />
+                    <TableNoData notFound={!listData.length && !loading} />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
 
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
-          </Box>
-
-          <TablePaginationCustom
-            page={table.page}
-            dense={table.dense}
-            count={listData.length}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onChangeDense={table.onChangeDense}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-          />
-        </Card>
-      </DashboardContent>:"Loading Orders"}
+              <TablePaginationCustom
+                component="div"
+                count={totalRows}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleRowsPerPageChange}
+              />
+            </>
+          )}
+        </Box>
+      </Card>
 
       <ConfirmDialog
         open={confirm.value}
@@ -300,7 +312,7 @@ export function OrderListView() {
         title="Delete"
         content={
           <>
-            Are you sure want to delete <strong> {table.selected.length} </strong> items?
+            Are you sure you want to delete <strong>{table.selected.length}</strong> items?
           </>
         }
         action={
@@ -308,7 +320,6 @@ export function OrderListView() {
             variant="contained"
             color="error"
             onClick={() => {
-              handleDeleteRows();
               confirm.onFalse();
             }}
           >
@@ -316,27 +327,6 @@ export function OrderListView() {
           </Button>
         }
       />
-    </>
+    </DashboardContent>
   );
-}
-
-function applyFilter({ inputData, comparator, filters }) {
-  const { id } = filters; // Get the id filter from filters
-
-  const stabilizedThis = inputData.map((el, index) => [el, index]);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  inputData = stabilizedThis.map((el) => el[0]);
-
-  // Filter by id if it is provided
-  if (id !== null && id !== undefined) { // Ensure id is not null or undefined
-    inputData = inputData.filter((order) => order.id === id);
-  }
-
-  return inputData;
 }

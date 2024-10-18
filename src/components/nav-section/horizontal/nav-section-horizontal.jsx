@@ -46,14 +46,22 @@ export function NavSectionHorizontal({
       >
         <NavUl sx={{ flexDirection: 'row', gap: 'var(--nav-item-gap)' }}>
           {data.map((group) => (
-            <Group
+            group?.roles?group?.roles.include(localStorage.getItem("role"))?<Group
               key={group.subheader ?? group.items[0].title}
               render={render}
               cssVars={cssVars}
               items={group.items}
               slotProps={slotProps}
               enabledRootRedirect={enabledRootRedirect}
-            />
+            />:"":<Group
+            key={group.subheader ?? group.items[0].title}
+            render={render}
+            cssVars={cssVars}
+            items={group.items}
+            slotProps={slotProps}
+            enabledRootRedirect={enabledRootRedirect}
+          />
+   
           ))}
         </NavUl>
       </Stack>
@@ -64,11 +72,12 @@ export function NavSectionHorizontal({
 // ----------------------------------------------------------------------
 
 function Group({ items, render, slotProps, enabledRootRedirect, cssVars }) {
+  console.log(items)
   return (
     <NavLi>
       <NavUl sx={{ flexDirection: 'row', gap: 'var(--nav-item-gap)' }}>
         {items.map((list) => (
-          <NavList
+          list?.roles?list?.roles.includes(localStorage.getItem("role"))?<NavList
             key={list.title}
             depth={1}
             data={list}
@@ -76,7 +85,15 @@ function Group({ items, render, slotProps, enabledRootRedirect, cssVars }) {
             cssVars={cssVars}
             slotProps={slotProps}
             enabledRootRedirect={enabledRootRedirect}
-          />
+          />:"":<NavList
+          key={list.title}
+          depth={1}
+          data={list}
+          render={render}
+          cssVars={cssVars}
+          slotProps={slotProps}
+          enabledRootRedirect={enabledRootRedirect}
+        />
         ))}
       </NavUl>
     </NavLi>
