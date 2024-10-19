@@ -43,9 +43,9 @@ export function SearchByHsnList() {
   const [hsnInput, setHsnInput] = useState('');
   const [cart, setCart] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const [userData, setUserData] = useState({ name: '', email: '', phone: '',fDiscount:'0',silverDiscount:'0',diamondDiscount:'0',paymentMethod:'' });
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '', fDiscount: '0', silverDiscount: '0', diamondDiscount: '0', paymentMethod: '' });
 
-  
+
 
   const getCartData = async () => {
     const resp = await axiosInstance.get('https://api.velonna.co/cart/').then((res) => {
@@ -62,7 +62,7 @@ export function SearchByHsnList() {
 
   useEffect(() => {
     // if (cart.length === 0) {
-      getCartData();
+    getCartData();
     // }
   }, []);
 
@@ -89,8 +89,8 @@ export function SearchByHsnList() {
   };
 
   const handleConfirmOrder = () => {
-    const savedData = JSON.parse(localStorage.getItem('userData')); 
-    if (Object.keys(JSON.parse(localStorage.getItem('userData'))).length===3){
+    const savedData = JSON.parse(localStorage.getItem('userData'));
+    if (JSON.parse(localStorage.getItem('userData') && Object.keys(JSON.parse(localStorage.getItem('userData'))).length === 3){
       localStorage.removeItem('userData')
       return
     }
@@ -168,7 +168,7 @@ export function SearchByHsnList() {
         <Card>
           <Box sx={{ p: 2 }} width="100%" display="flex" justifyContent="space-between">
             <span>Current Cart</span>
-            <Button color="success" disabled={cart.length===0} onClick={handleConfirmOrder}>
+            <Button color="success" disabled={cart.length === 0} onClick={handleConfirmOrder}>
               Confirm Order
             </Button>
           </Box>
@@ -183,7 +183,7 @@ export function SearchByHsnList() {
                       cart={false}
                       onDeleteRow={() => {
                         deleteCartItem(item.id);
-                       
+
                       }}
                       row={{
                         hsn: item.product.hsn,
@@ -211,104 +211,104 @@ export function SearchByHsnList() {
 
       {/* Modal for User Info */}
       <Modal open={openModal} onClose={handleCloseModal}>
-  <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, boxShadow: 24, width: 400 }}>
-    <h2>Billing details</h2>
-    <TextField
-      fullWidth
-      margin="normal"
-      label="Name"
-      required
-      value={userData.name}
-      onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-    />
-    <TextField
-      fullWidth
-      margin="normal"
-      label="Email"
-      value={userData.email}
-      onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-    />
-    <TextField
-      fullWidth
-      margin="normal"
-      label="Phone Number"
-      required
-      value={userData.phone}
-      onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
-    />
-    
-    <FormControl fullWidth margin="normal">
-      <InputLabel>Payment Method</InputLabel>
-      <Select
-      required
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, boxShadow: 24, width: 400 }}>
+          <h2>Billing details</h2>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Name"
+            required
+            value={userData.name}
+            onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Email"
+            value={userData.email}
+            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+          />
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Phone Number"
+            required
+            value={userData.phone}
+            onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+          />
 
-        value={userData.paymentMethod}
-        label="Payment Method"
-        onChange={(e) => setUserData({ ...userData, paymentMethod: e.target.value })}
-      >
-        <MenuItem value="upi">UPI</MenuItem>
-        <MenuItem value="cash">Cash</MenuItem>
-        <MenuItem value="netbanking">Net Banking</MenuItem>
-        <MenuItem value="card">Card</MenuItem>
-        <MenuItem value="other">Other</MenuItem>
-      </Select>
-    </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Payment Method</InputLabel>
+            <Select
+              required
 
-    {/* Diamond Discount */}
-    <FormControl fullWidth margin="normal">
-      <InputLabel>Diamond Discount</InputLabel>
-      <Select
-      required
+              value={userData.paymentMethod}
+              label="Payment Method"
+              onChange={(e) => setUserData({ ...userData, paymentMethod: e.target.value })}
+            >
+              <MenuItem value="upi">UPI</MenuItem>
+              <MenuItem value="cash">Cash</MenuItem>
+              <MenuItem value="netbanking">Net Banking</MenuItem>
+              <MenuItem value="card">Card</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </Select>
+          </FormControl>
 
-        value={userData.diamondDiscount}
-        label="Diamond Discount"
-        onChange={(e) => setUserData({ ...userData, diamondDiscount: e.target.value===''?'0': e.target.value })}
-      >
-        {Array.from({ length: 10 }, (_, i) => (
-          <MenuItem key={i} value={`${(i) * 5}%`}>
-            {(i ) * 5}%
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+          {/* Diamond Discount */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Diamond Discount</InputLabel>
+            <Select
+              required
 
-    {/* Silver Discount */}
-    <FormControl fullWidth margin="normal">
-      <InputLabel>Silver Discount</InputLabel>
-      <Select
-      required
+              value={userData.diamondDiscount}
+              label="Diamond Discount"
+              onChange={(e) => setUserData({ ...userData, diamondDiscount: e.target.value === '' ? '0' : e.target.value })}
+            >
+              {Array.from({ length: 10 }, (_, i) => (
+                <MenuItem key={i} value={`${(i) * 5}%`}>
+                  {(i) * 5}%
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-        value={userData.silverDiscount}
-        label="Silver Discount"
-        onChange={(e) => setUserData({ ...userData, silverDiscount: e.target.value===''?'0': e.target.value })}
-      >
-        {Array.from({ length: 10 }, (_, i) => (
-          <MenuItem key={i} value={`${(i) * 5}%`}>
-            {(i) * 5}%
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+          {/* Silver Discount */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Silver Discount</InputLabel>
+            <Select
+              required
 
-    {/* F_Discount */}
-    <TextField
-      fullWidth
-      margin="normal"
-      label="F Discount"
-      value={userData.fDiscount}
-      onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value===''?'0': e.target.value })}
-    />
+              value={userData.silverDiscount}
+              label="Silver Discount"
+              onChange={(e) => setUserData({ ...userData, silverDiscount: e.target.value === '' ? '0' : e.target.value })}
+            >
+              {Array.from({ length: 10 }, (_, i) => (
+                <MenuItem key={i} value={`${(i) * 5}%`}>
+                  {(i) * 5}%
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-      <Button onClick={handleCloseModal} sx={{ mr: 1 }}>
-        Cancel
-      </Button>
-      <Button variant="contained" onClick={handleOrderSubmission}>
-        Submit
-      </Button>
-    </Box>
-  </Box>
-</Modal>
+          {/* F_Discount */}
+          <TextField
+            fullWidth
+            margin="normal"
+            label="F Discount"
+            value={userData.fDiscount}
+            onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value === '' ? '0' : e.target.value })}
+          />
+
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+            <Button onClick={handleCloseModal} sx={{ mr: 1 }}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleOrderSubmission}>
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
 
     </>
   );
