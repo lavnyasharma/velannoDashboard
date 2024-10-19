@@ -90,6 +90,10 @@ export function SearchByHsnList() {
 
   const handleConfirmOrder = () => {
     const savedData = JSON.parse(localStorage.getItem('userData')); 
+    if (Object.keys(JSON.parse(localStorage.getItem('userData'))).length===3){
+      localStorage.removeItem('userData')
+      return
+    }
     if (savedData) {
       setUserData(savedData); // Pre-fill modal fields if data exists
     }
