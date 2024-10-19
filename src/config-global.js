@@ -5,7 +5,7 @@ import packageJson from '../package.json';
 // ----------------------------------------------------------------------
 
 export const CONFIG = {
-  appName: 'Minimal UI',
+  appName: 'velonna dashboard',
   appVersion: packageJson.version,
   serverUrl: process.env.REACT_APP_SERVER_URL ?? '',
   assetsDir: process.env.REACT_APP_ASSETS_DIR ?? '',

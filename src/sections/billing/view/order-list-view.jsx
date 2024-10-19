@@ -207,7 +207,7 @@ export function SearchByHsnList() {
       {/* Modal for User Info */}
       <Modal open={openModal} onClose={handleCloseModal}>
   <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', bgcolor: 'background.paper', p: 4, boxShadow: 24, width: 400 }}>
-    <h2>Enter Customer details</h2>
+    <h2>Billing details</h2>
     <TextField
       fullWidth
       margin="normal"
