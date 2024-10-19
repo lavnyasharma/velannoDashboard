@@ -245,6 +245,47 @@ export function SearchByHsnList() {
       </Select>
     </FormControl>
 
+    {/* Diamond Discount */}
+    <FormControl fullWidth margin="normal">
+      <InputLabel>Diamond Discount</InputLabel>
+      <Select
+        value={userData.diamondDiscount}
+        label="Diamond Discount"
+        onChange={(e) => setUserData({ ...userData, diamondDiscount: e.target.value })}
+      >
+        {Array.from({ length: 20 }, (_, i) => (
+          <MenuItem key={i} value={`${(i + 1) * 5}%`}>
+            {(i + 1) * 5}%
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    {/* Silver Discount */}
+    <FormControl fullWidth margin="normal">
+      <InputLabel>Silver Discount</InputLabel>
+      <Select
+        value={userData.silverDiscount}
+        label="Silver Discount"
+        onChange={(e) => setUserData({ ...userData, silverDiscount: e.target.value })}
+      >
+        {Array.from({ length: 20 }, (_, i) => (
+          <MenuItem key={i} value={`${(i + 1) * 5}%`}>
+            {(i + 1) * 5}%
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+    {/* F_Discount */}
+    <TextField
+      fullWidth
+      margin="normal"
+      label="F Discount"
+      value={userData.fDiscount}
+      onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value })}
+    />
+
     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
       <Button onClick={handleCloseModal} sx={{ mr: 1 }}>
         Cancel
@@ -255,6 +296,7 @@ export function SearchByHsnList() {
     </Box>
   </Box>
 </Modal>
+
     </>
   );
 }

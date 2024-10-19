@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Page, View, Text, Font, Image, Document, StyleSheet } from '@react-pdf/renderer';
 
 import { fDate } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
+import { cDiscount, fCurrency } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
@@ -87,6 +87,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
   console.log(items)
 
   const styles = useStyles();
+  const userData = JSON.parse(localStorage.getItem("userData"))
 
   const renderHeader = (
     <View style={[styles.container, styles.mb40]}>
@@ -188,18 +189,21 @@ export function InvoicePDF({ invoice, currentStatus }) {
                 <Text>{item.product.quantity}</Text>
               </View>
               <View style={styles.cell_4}>
-                <Text align="right">{item.product.is_gold ? "30%" : "10%"}</Text>
+                <Text align="right">{item.product.is_gold ? userData.diamondDiscount : userData.silverDiscount}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text>{item.product.is_gold ? fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * 0.30) : fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * 0.10)}</Text>
+                <Text>{item.product.is_gold ? fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * cDiscount(userData.diamondDiscount)) : fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * cDiscount(userData.silverDiscount))}</Text>
               </View>
             </View>
           ))}
 
           {[
-            { name: 'Subtotal', value: subtotal[0] },
+            { name: 'Subtotal', value: fCurrency(subtotal[1]) },
+            { name: "Additional", value: JSON.parse(localStorage.getItem("userData")).fDiscount.includes("%") ? `-${JSON.parse(localStorage.getItem("userData")).fDiscount}` : `-${fCurrency(cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount))}` },
             // { name: 'Shipping', value: -shipping },
             { name: 'Discount', value: `-${fCurrency(subtotal[1] - subtotal[0])}` },
+           
+            
             { name: 'Total', value: fCurrency(subtotal[0]), styles: styles.h4 },
           ].map((item) => (
             <View key={item.name} style={[styles.row, styles.noBorder]}>

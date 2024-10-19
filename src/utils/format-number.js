@@ -95,3 +95,15 @@ export function fData(inputValue) {
 
   return fm;
 }
+
+
+export function cDiscount(discount) {
+  // Check if the discount string contains a '%' symbol
+  if (discount.includes('%')) {
+      // Remove the '%' symbol and convert the remaining part to a float
+      const discountValue = parseFloat(discount.replace('%', ''));
+      // Return the discount as a multiplier (e.g., 30% -> 0.3)
+      return discountValue / 100;
+  } 
+      return parseFloat(discount);
+}

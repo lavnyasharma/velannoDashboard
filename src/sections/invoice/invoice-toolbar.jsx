@@ -44,6 +44,9 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
         email: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).email?JSON.parse(localStorage.getItem('userData')).email:"":"",
         phone: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).phone?JSON.parse(localStorage.getItem('userData')).phone:"":"",
         paymentMethod: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).paymentMethod?JSON.parse(localStorage.getItem('userData')).paymentMethod:"":"",
+        f_discount:localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).fDiscount?JSON.parse(localStorage.getItem('userData')).fDiscount:"":"",
+        silver_discount:localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).silverDiscount?JSON.parse(localStorage.getItem('userData')).silverDiscount:"":"",
+        diamond_discount:localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).diamondDiscount?JSON.parse(localStorage.getItem('userData')).diamondDiscount:"":"",
       })
       .then(async (res) => {
         toast.success('Order Created');

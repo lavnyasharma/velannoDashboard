@@ -29,6 +29,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Grid, Stac
 import { Scrollbar } from 'src/components/scrollbar';
 import { ProductsAnalytic } from '../product-analytics';
 import { RenderCellMaterialProduct, RenderCellProduct } from '../product-table-row';
+import SummaryCard from '../components/tab';
 
 
 
@@ -39,6 +40,7 @@ import { RenderCellMaterialProduct, RenderCellProduct } from '../product-table-r
 // API details
 const API_URL = 'https://api.velonna.co/list-product/user/';
 const API_URL_SUMMARY = 'https://api.velonna.co/product/summary/seller/';
+
 
 // ----------------------------------------------------------------------
 
@@ -273,44 +275,21 @@ export function ProductListView() {
         )}
 
         <Card sx={{ mb: { xs: 3, md: 5 } }}>
-          <Accordion defaultExpanded>
+          <Accordion defaultExpanded={false}>
             <AccordionSummary
               expandIcon={<GridExpandMoreIcon />}
               aria-controls="panel1a-content"
               id="panel1a-header"
+              sx={{ml:"40px"}}
             >
-              <Typography variant="h6">Category Wise Inventory Details</Typography>
+              <Typography variant="h5">Category Wise Inventory Details</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Scrollbar sx={{ minHeight: 500 }}>
                 <Grid container spacing={3} padding={5}>
                   {summaryData?.category_summary?.map((category) => (
                     <Grid item xs={12} sm={6} md={4} key={category.category__name}>
-                      <Card>
-                        <Box sx={{ p: 2 }}>
-                          <Typography variant="subtitle1" gutterBottom>
-                            {category.category__name.charAt(0).toUpperCase() + category.category__name.slice(1)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>TL(Items):</strong> {category.total_left}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>TA(Items):</strong> {category.total_assigned}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>TL(Price):</strong> {fCurrency(category.total_price_left)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>TA(Price):</strong> ₹{fCurrency(category.total_price_assigned)}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>TL(Weight):</strong> {category.total_weight_left}g
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            <strong>TA(Weight):</strong> {category.total_weight_assigned}g
-                          </Typography>
-                        </Box>
-                      </Card>
+                      <SummaryCard category={category}/>
                     </Grid>
                   ))}
                 </Grid>

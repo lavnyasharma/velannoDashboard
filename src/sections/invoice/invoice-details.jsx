@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 
 import { fDate } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
+import { cDiscount, fCurrency } from 'src/utils/format-number';
 
 import { INVOICE_STATUS_OPTIONS } from 'src/_mock';
 
@@ -56,20 +56,26 @@ export function InvoiceDetails({ invoice }) {
         </TableCell>
         <TableCell width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          {fCurrency(invoice?.subtotal[0])}
+          {fCurrency(invoice?.subtotal[1])}
         </TableCell>
       </StyledTableRow>
 
-
+      {cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount) !== "0" ? <StyledTableRow>
+        <TableCell colSpan={3} />
+        <TableCell sx={{ color: 'text.secondary' }}>Additional</TableCell>
+        <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
+          {JSON.parse(localStorage.getItem("userData")).fDiscount.includes("%") ? `-${JSON.parse(localStorage.getItem("userData")).fDiscount}` : `-${fCurrency(cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount))}`}
+        </TableCell>
+      </StyledTableRow> : ""}
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Discount</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-        {`-${fCurrency((invoice?.subtotal?.[1] || 0) - (invoice?.subtotal?.[0] || 0))}`}
+          {`-${fCurrency((invoice?.subtotal?.[1] || 0) - (invoice?.subtotal?.[0] || 0))}`}
         </TableCell>
       </StyledTableRow>
 
-     
+
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
@@ -134,9 +140,9 @@ export function InvoiceDetails({ invoice }) {
               <TableCell>{row.product.quantity}</TableCell>
 
               <TableCell align="right">{fCurrency(row.product.price)}</TableCell>
-              <TableCell align="right">{row.product.is_gold ? "30%" : "10%"}</TableCell>
+              <TableCell align="right">{row.product.is_gold ? JSON.parse(localStorage.getItem("userData")).diamondDiscount : JSON.parse(localStorage.getItem("userData")).silverDiscount}</TableCell>
 
-              <TableCell align="right">{row.product.is_gold ? fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * 0.30) : fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * 0.10)}</TableCell>
+              <TableCell align="right">{row.product.is_gold ? fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * cDiscount(JSON.parse(localStorage.getItem("userData")).diamondDiscount)) : fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * cDiscount(JSON.parse(localStorage.getItem("userData")).silverDiscount))}</TableCell>
             </TableRow>
           ))}
 
