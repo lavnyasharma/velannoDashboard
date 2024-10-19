@@ -90,7 +90,7 @@ export function SearchByHsnList() {
 
   const handleConfirmOrder = () => {
     const savedData = JSON.parse(localStorage.getItem('userData'));
-    if (JSON.parse(localStorage.getItem('userData') && Object.keys(JSON.parse(localStorage.getItem('userData'))).length === 3){
+    if (localStorage.getItem('userData') && Object.keys(JSON.parse(localStorage.getItem('userData'))).length === 3){
       localStorage.removeItem('userData')
       return
     }
