@@ -122,9 +122,9 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
             <View style={{ width: '50%' }}>
                 <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
-                <Text style={styles.body2}>{cname || 'Customer Name'}</Text>
-                <Text style={styles.body2}>{email || 'Customer Email'}</Text>
-                <Text style={styles.body2}>{phone || 'Customer Phone'}</Text>
+                <Text style={styles.body2}>{cname || ''}</Text>
+                <Text style={styles.body2}>{email || ''}</Text>
+                <Text style={styles.body2}>{phone || ''}</Text>
             </View>
         </View>
     );
