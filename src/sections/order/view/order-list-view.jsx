@@ -163,7 +163,7 @@ export function OrderListView() {
             >
               <OrderAnalytic
                 title="Total"
-                total={summaryData?.total_sales_summary?.total_sales}
+                total={summaryData?.total_sales_summary?.total_quantity}
                 percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_sales_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
                 weight={summaryData?.total_sales_summary?.total_weight}
                 price={summaryData?.total_sales_summary?.total_price}

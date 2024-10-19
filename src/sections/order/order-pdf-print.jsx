@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Page, View, Text, Font, Image, Document, StyleSheet } from '@react-pdf/renderer';
 
 import { fDate } from 'src/utils/format-time';
-import { fCurrency } from 'src/utils/format-number';
+import { cDiscount, fCurrency } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
@@ -77,11 +77,15 @@ export function InvoicePDF({ invoice, currentStatus }) {
         email,       // Customer email
         phone,       // Customer phone
         order_number,
+        diamond_discount,
+        silver_discount,
+        f_discount
     } = invoice;
 
     const styles = useStyles();
-    const discountsilverpercent = 0.10
-    const discountdiamondpercent = 0.30
+    const discountsilverpercent = cDiscount(silver_discount)
+    const discountdiamondpercent = cDiscount(diamond_discount)
+    const fDiscount  = cDiscount(f_discount)
     // Calculate the subtotal from the items if not explicitly provided
     const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     const totalAmount = items.reduce((acc, item) => acc + item.total , 0);
@@ -193,6 +197,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
                     {[
                         { name: 'Subtotal', value: fCurrency(subtotal) },
+                        { name: 'Additional', value: `-${f_discount}` },
                         { name: 'Discount', value: `-${fCurrency(discount)}` },
                         { name: 'Total', value: fCurrency(totalAmount), styles: styles.h4 },
                     ].map((item) => (
