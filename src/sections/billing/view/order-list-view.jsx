@@ -43,7 +43,7 @@ export function SearchByHsnList() {
   const [hsnInput, setHsnInput] = useState('');
   const [cart, setCart] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const [userData, setUserData] = useState({ name: '', email: '', phone: '', fDiscount: '0', silverDiscount: '0', diamondDiscount: '0', paymentMethod: '' });
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '', fDiscount: '', silverDiscount: '0', diamondDiscount: '0', paymentMethod: '' });
 
 
 
@@ -296,7 +296,7 @@ export function SearchByHsnList() {
             margin="normal"
             label="F Discount"
             value={userData.fDiscount}
-            onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value === '' ? '0' : e.target.value })}
+            onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value === '' ? '' : e.target.value })}
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
