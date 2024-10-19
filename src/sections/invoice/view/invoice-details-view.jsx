@@ -26,7 +26,7 @@ export function InvoiceDetailsView({ invoice }) {
       const discountedPrice = price * (1 - discount); // Apply discount to the price
       const fdiscount = cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount)
       const finalsubtotal = subtotal + discountedPrice * quantity
-      if (fdiscount < 1) {
+      if (fdiscount < 1 && fdiscount!==0) {
         return finalsubtotal - (finalsubtotal * fdiscount)
       }
 

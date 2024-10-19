@@ -43,7 +43,7 @@ export function SearchByHsnList() {
   const [hsnInput, setHsnInput] = useState('');
   const [cart, setCart] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const [userData, setUserData] = useState({ name: '', email: '', phone: '' });
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '',fDiscount:'0',silverDiscount:'0',diamondDiscount:'0',paymentMethod:'' });
 
   
 
@@ -97,6 +97,7 @@ export function SearchByHsnList() {
   };
 
   const handleOrderSubmission = () => {
+    console.log(userData)
     // Save user data to localStorage
     localStorage.setItem('userData', JSON.stringify(userData));
 
@@ -212,6 +213,7 @@ export function SearchByHsnList() {
       fullWidth
       margin="normal"
       label="Name"
+      required
       value={userData.name}
       onChange={(e) => setUserData({ ...userData, name: e.target.value })}
     />
@@ -226,6 +228,7 @@ export function SearchByHsnList() {
       fullWidth
       margin="normal"
       label="Phone Number"
+      required
       value={userData.phone}
       onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
     />
@@ -233,6 +236,8 @@ export function SearchByHsnList() {
     <FormControl fullWidth margin="normal">
       <InputLabel>Payment Method</InputLabel>
       <Select
+      required
+
         value={userData.paymentMethod}
         label="Payment Method"
         onChange={(e) => setUserData({ ...userData, paymentMethod: e.target.value })}
@@ -249,13 +254,15 @@ export function SearchByHsnList() {
     <FormControl fullWidth margin="normal">
       <InputLabel>Diamond Discount</InputLabel>
       <Select
+      required
+
         value={userData.diamondDiscount}
         label="Diamond Discount"
-        onChange={(e) => setUserData({ ...userData, diamondDiscount: e.target.value })}
+        onChange={(e) => setUserData({ ...userData, diamondDiscount: e.target.value===''?'0': e.target.value })}
       >
-        {Array.from({ length: 20 }, (_, i) => (
-          <MenuItem key={i} value={`${(i + 1) * 5}%`}>
-            {(i + 1) * 5}%
+        {Array.from({ length: 10 }, (_, i) => (
+          <MenuItem key={i} value={`${(i) * 5}%`}>
+            {(i ) * 5}%
           </MenuItem>
         ))}
       </Select>
@@ -265,13 +272,15 @@ export function SearchByHsnList() {
     <FormControl fullWidth margin="normal">
       <InputLabel>Silver Discount</InputLabel>
       <Select
+      required
+
         value={userData.silverDiscount}
         label="Silver Discount"
-        onChange={(e) => setUserData({ ...userData, silverDiscount: e.target.value })}
+        onChange={(e) => setUserData({ ...userData, silverDiscount: e.target.value===''?'0': e.target.value })}
       >
-        {Array.from({ length: 20 }, (_, i) => (
-          <MenuItem key={i} value={`${(i + 1) * 5}%`}>
-            {(i + 1) * 5}%
+        {Array.from({ length: 10 }, (_, i) => (
+          <MenuItem key={i} value={`${(i) * 5}%`}>
+            {(i) * 5}%
           </MenuItem>
         ))}
       </Select>
@@ -283,7 +292,7 @@ export function SearchByHsnList() {
       margin="normal"
       label="F Discount"
       value={userData.fDiscount}
-      onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value })}
+      onChange={(e) => setUserData({ ...userData, fDiscount: e.target.value===''?'0': e.target.value })}
     />
 
     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>

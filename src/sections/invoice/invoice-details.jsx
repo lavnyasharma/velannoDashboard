@@ -43,6 +43,7 @@ export function InvoiceDetails({ invoice }) {
     setCurrentStatus(event.target.value);
   }, []);
   const cardRef = useRef();
+  console.log(invoice)
 
 
 
