@@ -264,9 +264,9 @@ export function SearchByHsnList() {
               label="Diamond Discount"
               onChange={(e) => setUserData({ ...userData, diamondDiscount: e.target.value === '' ? '0' : e.target.value })}
             >
-              {Array.from({ length: 10 }, (_, i) => (
-                <MenuItem key={i} value={`${(i) * 5}%`}>
-                  {(i) * 5}%
+              {Array.from({ length: 31 }, (_, i) => (
+                <MenuItem key={i} value={`${(i)}%`}>
+                  {(i)}%
                 </MenuItem>
               ))}
             </Select>
@@ -282,9 +282,9 @@ export function SearchByHsnList() {
               label="Silver Discount"
               onChange={(e) => setUserData({ ...userData, silverDiscount: e.target.value === '' ? '0' : e.target.value })}
             >
-              {Array.from({ length: 10 }, (_, i) => (
-                <MenuItem key={i} value={`${(i) * 5}%`}>
-                  {(i) * 5}%
+              {Array.from({ length: 31 }, (_, i) => (
+                <MenuItem key={i} value={`${(i)}%`}>
+                  {(i) }%
                 </MenuItem>
               ))}
             </Select>
