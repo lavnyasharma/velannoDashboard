@@ -85,12 +85,13 @@ export function InvoicePDF({ invoice, currentStatus }) {
     const styles = useStyles();
     const discountsilverpercent = cDiscount(silver_discount)
     const discountdiamondpercent = cDiscount(diamond_discount)
-    const fDiscount  = cDiscount(f_discount)
+    const fDiscount = cDiscount(f_discount)
     // Calculate the subtotal from the items if not explicitly provided
     const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
-    const totalAmount = items.reduce((acc, item) => acc + item.total , 0);
+    const totalAmount = items.reduce((acc, item) => acc + item.total, 0);
+    const finalTotal = fDiscount < 1 && fDiscount > 0 ? totalAmount - (totalAmount * fDiscount) : totalAmount - fDiscount
     const discount = subtotal - totalAmount
-    
+
 
     const renderHeader = (
         <View style={[styles.container, styles.mb40]}>
@@ -183,13 +184,13 @@ export function InvoicePDF({ invoice, currentStatus }) {
                                 <Text>{item.quantity}</Text>
                             </View>
                             <View style={styles.cell_4}>
-                                <Text>{item.product.is_gold ? `${discountdiamondpercent*100}%` : `${discountsilverpercent*100}%`}</Text>
+                                <Text>{item.product.is_gold ? `${discountdiamondpercent * 100}%` : `${discountsilverpercent * 100}%`}</Text>
                             </View>
                             <View style={[styles.cell_5, { textAlign: 'right' }]}>
                                 <Text>
                                     {fCurrency(item.product.is_gold
-                                        ? (item.product.price * item.quantity) * (1-discountdiamondpercent)
-                                        : (item.product.price * item.quantity) * (1-discountsilverpercent))}
+                                        ? (item.product.price * item.quantity) * (1 - discountdiamondpercent)
+                                        : (item.product.price * item.quantity) * (1 - discountsilverpercent))}
                                 </Text>
                             </View>
                         </View>
@@ -197,9 +198,9 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
                     {[
                         { name: 'Subtotal', value: fCurrency(subtotal) },
-                        { name: 'Additional', value: `-${f_discount}` },
+                        { name: 'Additional', value: `-${fDiscount}` },
                         { name: 'Discount', value: `-${fCurrency(discount)}` },
-                        { name: 'Total', value: fCurrency(totalAmount), styles: styles.h4 },
+                        { name: 'Total', value: fCurrency(finalTotal), styles: styles.h4 },
                     ].map((item) => (
                         <View key={item.name} style={[styles.row, styles.noBorder]}>
                             <View style={styles.cell_1} />

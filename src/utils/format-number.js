@@ -98,6 +98,9 @@ export function fData(inputValue) {
 
 
 export function cDiscount(discount) {
+  if (discount===""){
+    return 0
+  }
   // Check if the discount string contains a '%' symbol
   if (discount.includes('%')) {
       // Remove the '%' symbol and convert the remaining part to a float

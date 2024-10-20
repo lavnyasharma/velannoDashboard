@@ -19,20 +19,20 @@ export function InvoiceDetailsView({ invoice }) {
   }
 
   function calculateDiscountedSubtotal(cartItems) {
-    return cartItems.reduce((subtotal, item) => {
+    const final =  cartItems.reduce((subtotal, item) => {
       const price = parseFloat(item.product.price); // Convert price to a number
       const quantity = item.quantity; // Get the quantity
       const discount = item.product.is_gold ? cDiscount(JSON.parse(localStorage.getItem("userData")).diamondDiscount) : cDiscount(JSON.parse(localStorage.getItem("userData")).silverDiscount); // 30% for gold, 10% for non-gold
       const discountedPrice = price * (1 - discount); // Apply discount to the price
-      const fdiscount = cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount === '' ? '0' : JSON.parse(localStorage.getItem("userData")).fDiscount)
-      const finalsubtotal = subtotal + discountedPrice * quantity
-      if (fdiscount < 1 && fdiscount !== 0) {
-        return finalsubtotal - (finalsubtotal * fdiscount)
-      }
-
-
-      return finalsubtotal - fdiscount; // Accumulate the subtotal
+      return subtotal + discountedPrice * quantity
+     
     }, 0);
+    const fdiscount = cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount === '' ? '0' : JSON.parse(localStorage.getItem("userData")).fDiscount)
+
+    if (fdiscount < 1 && fdiscount !== 0) {
+      return final - (final * fdiscount)
+    }
+    return final - fdiscount; // Accumulate the subtotal
   }
 
   function getTodayDateString() {
