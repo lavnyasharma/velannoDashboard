@@ -241,10 +241,14 @@ export function OrderListView() {
             <TextField
               label="Search"
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(0); // Reset to the first page on search
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSearchTerm(e.target.value);
+                  setPage(0); // Reset to the first page on search
+                }
+
               }}
+
               variant="outlined"
               sx={{ width: 250 }}
             />
@@ -274,10 +278,10 @@ export function OrderListView() {
             <TableHeadCustom headLabel={TABLE_HEAD} />
             <TableBody>
               {loading ? (
-                <TableNoData  colSpan={TABLE_HEAD.length} />
+                <TableNoData colSpan={TABLE_HEAD.length} />
               ) : (
                 listData.map((row) => (
-                  <OrderTableRow key={row.id} row={row} selected={table.selected.includes(row.id)}    onSelectRow={() => table.onSelectRow(row.id)} onViewRow={() => handleViewRow(row.id)} />
+                  <OrderTableRow key={row.id} row={row} selected={table.selected.includes(row.id)} onSelectRow={() => table.onSelectRow(row.id)} onViewRow={() => handleViewRow(row.id)} />
                 ))
               )}
             </TableBody>
