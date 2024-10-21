@@ -44,6 +44,7 @@ const TABLE_HEAD = [
 ];
 
 export function OrderListView() {
+  const [term, setTerm] = useState('')
   const [listData, setListData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -132,6 +133,7 @@ export function OrderListView() {
     setEndDate('');
     setSearchTerm(''); // Reset the search term
     setPage(0);
+    setTerm('')
   };
 
   const handleViewRow = useCallback(
@@ -240,10 +242,13 @@ export function OrderListView() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <TextField
               label="Search"
-              value={searchTerm}
+              value={term}
+              onChange={(e)=>{
+                setTerm(e.target.value)
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  setSearchTerm(e.target.value);
+                  setSearchTerm(term);
                   setPage(0); // Reset to the first page on search
                 }
 
