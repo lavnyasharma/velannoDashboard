@@ -25,11 +25,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useTheme } from '@emotion/react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Grid, Stack, Typography } from '@mui/material';
-import { Scrollbar } from 'src/components/scrollbar';
-import { ProductsAnalytic } from '../product-analytics';
 import { RenderCellMaterialProduct, RenderCellProduct } from '../product-table-row';
-import SummaryCard from '../components/tab';
 
 
 
@@ -48,7 +44,7 @@ const HIDE_COLUMNS = { category: false };
 
 // ----------------------------------------------------------------------
 
-export function ProductListView() {
+export function ProductReportListView() {
   const [summaryData, setSummaryData] = useState({})
   const confirmRows = useBoolean();
   const router = useRouter();
@@ -201,101 +197,8 @@ export function ProductListView() {
   return (
     <>
       <DashboardContent sx={{ height: "auto" }}>
-        <CustomBreadcrumbs
-          heading="List"
-          links={[
-            { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Product', href: paths.dashboard.product.root },
-            { name: 'List' },
-          ]}
-          action={localStorage.getItem("role") === "admin" ?
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.product.new}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              New product
-            </Button> : ""
-          }
-          sx={{ mb: { xs: 3, md: 5 } }}
-        />
-        {Object.keys(summaryData).length !== 0 ? (
-          <Card sx={{ mb: { xs: 3, md: 5 } }}>
-            <Scrollbar sx={{ minHeight: 108 }}>
-              <Stack
-                direction="row"
-                divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-                sx={{ py: 2 }}
-              >
-                <ProductsAnalytic
-                  title="Total"
-                  total={summaryData.total_summary.total_assigned}
-                  ltotal={summaryData.total_summary.total_left}
-                  percent={(((summaryData.total_summary.total_assigned ?? 0) - (summaryData.total_summary.total_left ?? 0)) / (summaryData.total_summary.total_assigned ?? 1)) * 100}
-                  weight={summaryData.total_summary.total_weight_left}
-                  price={summaryData.total_summary.total_price_left}
-                  lweight={summaryData.total_summary.total_weight_assigned}
-                  lprice={summaryData.total_summary.total_price_assigned}
-                  icon="solar:bill-list-bold-duotone"
-                  color={theme.vars.palette.info.main}
-                />
 
-                <ProductsAnalytic
-                  title="Diamond"
-                  total={summaryData.diamond_products.total_assigned}
-                  ltotal={summaryData.diamond_products.total_left}
-                  percent={(((summaryData.diamond_products.total_assigned ?? 0) - (summaryData.diamond_products.total_left ?? 0)) / (summaryData.diamond_products.total_assigned ?? 1)) * 100}
-                  weight={summaryData.diamond_products.total_weight_left}
-                  price={summaryData.diamond_products.total_price_left}
-                  lweight={summaryData.diamond_products.total_weight_assigned}
-                  lprice={summaryData.diamond_products.total_price_assigned}
-                  icon="material-symbols:diamond"
-                  color={theme.vars.palette.success.main}
-                />
 
-                <ProductsAnalytic
-                  title="Silver"
-                  total={summaryData.silver_products.total_assigned}
-                  ltotal={summaryData.silver_products.total_left}
-                  percent={(((summaryData.silver_products.total_assigned ?? 0) - (summaryData.silver_products.total_left ?? 0)) / (summaryData.silver_products.total_assigned ?? 1)) * 100}
-                  weight={summaryData.silver_products.total_weight_left}
-                  price={summaryData.silver_products.total_price_left}
-                  lweight={summaryData.silver_products.total_weight_assigned}
-                  lprice={summaryData.silver_products.total_price_assigned}
-                  icon="mdi:podium-silver"
-                  color={theme.vars.palette.warning.main}
-                />
-              </Stack>
-            </Scrollbar>
-          </Card>
-        ) : (
-          ""
-        )}
-
-        <Card sx={{ mb: { xs: 3, md: 5 } }}>
-          <Accordion defaultExpanded={false}>
-            <AccordionSummary
-              expandIcon={<GridExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-              sx={{ ml: "40px" }}
-            >
-              <Typography variant="h5">Category Wise Inventory Details</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Scrollbar sx={{ minHeight: 500 }}>
-                <Grid container spacing={3} padding={5}>
-                  {summaryData?.category_summary?.map((category) => (
-                    <Grid item xs={12} sm={6} md={4} key={category.category__name}>
-                      <SummaryCard category={category} />
-                    </Grid>
-                  ))}
-                </Grid>
-              </Scrollbar>
-            </AccordionDetails>
-          </Accordion>
-        </Card>
         <Select
 
           value={filterQuantity}

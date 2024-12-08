@@ -13,11 +13,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { toast } from 'src/components/snackbar';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
-import Typography from '@mui/material/Typography';
-import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
+import * as XLSX from 'xlsx';
+
 import {
   useTable,
   TableNoData,
@@ -25,11 +22,8 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 import { useTheme } from '@emotion/react';
-import { LoadingIcon } from 'yet-another-react-lightbox';
-import { Divider, Stack, Grid } from '@mui/material';
-import { GridExpandMoreIcon } from '@mui/x-data-grid';
 import { OrderTableRow } from '../order-table-row';
-import { OrderAnalytic } from '../order-analytics';
+
 
 const TABLE_HEAD = [
   { id: 'orderNumber', label: 'Select', width: 88 },
@@ -42,7 +36,7 @@ const TABLE_HEAD = [
   { id: 'actions', label: 'Actions', width: 140 },
 ];
 
-export function OrderListView() {
+export function OrderReportListView() {
   const [term, setTerm] = useState('')
   const [listData, setListData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
@@ -51,7 +45,7 @@ export function OrderListView() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // Added search term state
+  const [searchTerm, setSearchTerm] = useState('');
   const theme = useTheme();
 
   const [summaryData, setSummaryData] = useState({});
@@ -72,7 +66,7 @@ export function OrderListView() {
         offset,
         start_date: startDate || undefined,
         end_date: endDate || undefined,
-        search: searchTerm || undefined, // Include search term in the params
+        search: searchTerm || undefined,
       };
 
       const { data } = await axiosInstance.get('/order-lists/', { params });
@@ -82,7 +76,7 @@ export function OrderListView() {
       toast.error('Error fetching orders');
     }
     setLoading(false);
-  }, [startDate, endDate, searchTerm]); // Add searchTerm to the dependencies
+  }, [startDate, endDate, searchTerm]);
 
   const getSummaryData = useCallback(async () => {
     setLoading(true);
@@ -106,7 +100,6 @@ export function OrderListView() {
   }, [getListData, getSummaryData, page, rowsPerPage]);
 
   const handlePageChange = (event, newPage) => {
-    setListData([])
     setPage(newPage);
   };
 
@@ -129,7 +122,7 @@ export function OrderListView() {
   const handleResetFilters = () => {
     setStartDate('');
     setEndDate('');
-    setSearchTerm(''); // Reset the search term
+    setSearchTerm('');
     setPage(0);
     setTerm('')
   };
@@ -141,117 +134,58 @@ export function OrderListView() {
     [router]
   );
 
+
+
+  const downloadExcel = async () => {
+    const { data } = await axiosInstance.get('/order-lists/?limit=1000',);
+    const results = data.results
+    // Extract the headers for the Excel file
+    const headers = [
+      'Order Number', 'Customer Name', 'Phone', 'Order Date', 'Product ID', 'Product Name', 'Category',
+      'Collection', 'Price', 'Quantity', 'Total Price', 'Payment Method'
+    ];
+
+    // Process each order and item to create rows for the Excel file
+    const rows = results.flatMap(order =>
+      order.items.map(item => [
+        order.order_number,
+        order.cname,
+        order.phone,
+        order.created,
+        item.product.id,
+        item.product.title,
+        item.product.category,
+        item.product.collection,
+        item.product.price,
+        item.quantity,
+        item.total,
+        order.payment_method || 'N/A'
+      ])
+    );
+
+    // Create a worksheet and add headers and rows
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Items Sold');
+
+    // Generate Excel file and trigger download
+    XLSX.writeFile(workbook, 'items_sold_report.xlsx');
+  };
   return (
     <DashboardContent>
-      <CustomBreadcrumbs
-        heading="List"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Order', href: paths.dashboard.order.root },
-          { name: 'List' },
-        ]}
-        sx={{ mb: { xs: 3, md: 5 } }}
-      />
-
-      {Object.keys(summaryData).length !== 0 ? (
-        <Card sx={{ mb: { xs: 3, md: 5 } }}>
-          <Scrollbar sx={{ minHeight: 108 }}>
-            <Stack
-              direction="row"
-              divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-              sx={{ py: 2 }}
-            >
-              <OrderAnalytic
-                title="Total"
-                total={summaryData?.total_sales_summary?.total_quantity}
-                percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_sales_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
-                weight={summaryData?.total_sales_summary?.total_weight}
-                price={summaryData?.total_sales_summary?.total_price}
-                icon="solar:bill-list-bold-duotone"
-                color={theme.vars.palette.info.main}
-              />
-
-              <OrderAnalytic
-                title="Diamond"
-                total={summaryData?.diamond_sales?.total_sales}
-                percent={(((summaryData?.total_diamond ?? 0) - (summaryData?.diamond_sales?.total_sales ?? 0)) / (summaryData?.total_diamond ?? 1)) * 100}
-                weight={summaryData?.diamond_sales?.total_weight}
-                price={summaryData?.diamond_sales?.total_price}
-                icon="material-symbols:diamond"
-                color={theme.vars.palette.success.main}
-              />
-
-              <OrderAnalytic
-                title="Silver"
-                total={summaryData?.silver_sales?.total_sales}
-                percent={(((summaryData?.total_silver ?? 0) - (summaryData?.silver_sales?.total_sales ?? 0)) / (summaryData?.total_silver ?? 1)) * 100}
-                weight={summaryData?.silver_sales?.total_weight}
-                price={summaryData?.silver_sales?.total_price}
-                icon="mdi:podium-silver"
-                color={theme.vars.palette.warning.main}
-              />
-            </Stack>
-          </Scrollbar>
-        </Card>
-      ) : (
-        ''
-      )}
-
-      <Card sx={{ mb: { xs: 3, md: 5 } }}>
-        <Accordion defaultExpanded={false}>
-          <AccordionSummary
-            expandIcon={<GridExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
-          >
-            <Typography variant="h6">Category wise Sales</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Scrollbar sx={{ minHeight: 500 }}>
-              <Grid container spacing={3} padding={5}>
-                {summaryData?.category_sales?.map((category) => (
-                  <Grid item xs={12} sm={6} md={4} key={category.product__category__name}>
-                    <Card>
-                      <Box sx={{ p: 2 }}>
-                        <Typography variant="subtitle1" gutterBottom>
-                          {category.product__category__name.charAt(0).toUpperCase() + category.product__category__name.slice(1)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Total Sold:</strong> {category.total_sold}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Total Price:</strong> ₹{category.total_price.toLocaleString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Total Weight:</strong> {category.total_weight}g
-                        </Typography>
-                      </Box>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Scrollbar>
-          </AccordionDetails>
-        </Accordion>
-      </Card>
-
       <Card>
         <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <TextField
               label="Search"
               value={term}
-              onChange={(e) => {
-                setTerm(e.target.value)
-              }}
+              onChange={(e) => setTerm(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   setSearchTerm(term);
-                  setPage(0); // Reset to the first page on search
+                  setPage(0);
                 }
-
               }}
-
               variant="outlined"
               sx={{ width: 250 }}
             />
@@ -260,21 +194,18 @@ export function OrderListView() {
               type="date"
               value={startDate}
               onChange={(e) => handleDateChange(e, true)}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              InputLabelProps={{ shrink: true }}
             />
             <TextField
               label="End Date"
               type="date"
               value={endDate}
               onChange={(e) => handleDateChange(e, false)}
-              InputLabelProps={{
-                shrink: true,
-              }}
+              InputLabelProps={{ shrink: true }}
             />
             <Button onClick={handleResetFilters}>Reset Filters</Button>
           </Box>
+          <Button variant="contained" color="primary" onClick={downloadExcel}>Download as CSV</Button> {/* Download Button */}
         </Box>
         <Scrollbar sx={{ minHeight: 444 }}>
           <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
@@ -284,7 +215,7 @@ export function OrderListView() {
                 <TableNoData colSpan={TABLE_HEAD.length} />
               ) : (
                 listData.map((row) => (
-                  <OrderTableRow key={row.id} row={row}  onSelectRow={() => table.onSelectRow(row.id)} onViewRow={() => handleViewRow(row.id)} />
+                  <OrderTableRow key={row.id} row={row} selected={table.selected.includes(row.id)} onSelectRow={() => table.onSelectRow(row.id)} onViewRow={() => handleViewRow(row.id)} />
                 ))
               )}
             </TableBody>

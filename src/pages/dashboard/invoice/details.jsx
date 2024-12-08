@@ -19,20 +19,20 @@ export default function Page() {
   const router = useRouter()
   const { id = '' } = useParams();
   const getCartData = async () => {
-    const resp = await axiosInstance.get('https://api.velonna.co/cart/').then((res) => {
-      if (res.data.count === 0){
+    const resp = await axiosInstance.get('/cart/').then((res) => {
+      if (res.data.count === 0) {
         router.push(paths.dashboard.search.root)
       }
-      console.log(res.data.results);
+      
       setCart(res.data.results);
     });
   };
-  const [cart,setCart] = useState([])
-  useEffect( ()=>{
-    
-  getCartData()
+  const [cart, setCart] = useState([])
+  useEffect(() => {
+
+    getCartData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
+  }, [])
 
   return (
     <>
@@ -40,7 +40,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-    {cart.length===0?<LoadingScreen/>:  <InvoiceDetailsView invoice={cart} />}
+      {cart.length === 0 ? <LoadingScreen /> : <InvoiceDetailsView invoice={cart} />}
     </>
   );
 }

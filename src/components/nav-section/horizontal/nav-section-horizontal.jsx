@@ -72,7 +72,7 @@ export function NavSectionHorizontal({
 // ----------------------------------------------------------------------
 
 function Group({ items, render, slotProps, enabledRootRedirect, cssVars }) {
-  console.log(items)
+  
   return (
     <NavLi>
       <NavUl sx={{ flexDirection: 'row', gap: 'var(--nav-item-gap)' }}>

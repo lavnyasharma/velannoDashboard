@@ -31,14 +31,13 @@ export function AuthProvider({ children }) {
 
         if (username) {
           // Make API call with username and accessToken
-          const res = await axios.get(`${endpoints.auth.me}${username}`, {
+          const res = await axios.get(`${endpoints.auth.me}${username}/`, {
             headers: {
               Authorization: `Bearer ${accessToken}`, // Pass the token in the Authorization header
             },
           });
 
           const { user, role,email,first_name,last_name,profile_picture } = res.data;
-          console.log(email)
           if (role === "customer") {
             toast.error("You are not authorized to access this resource ")
 
@@ -50,7 +49,6 @@ export function AuthProvider({ children }) {
             localStorage.setItem("role", role)
           }
 
-          console.log(user)
           setState({ user: { ...user, accessToken,role,email,username,first_name,last_name,profile_picture }, loading: false });
         } else {
           console.error("Username not found in localStorage");
@@ -92,7 +90,6 @@ export function AuthProvider({ children }) {
     }),
     [checkUserSession, state.user, status]
   );
-  console.log(memoizedValue)
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
 }

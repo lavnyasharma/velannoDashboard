@@ -123,3 +123,21 @@ export const merge = (target, ...sources) => {
 
   return merge(target, ...sources);
 };
+
+
+export function capitalizeFirstLetter(str) {
+  return str
+    .split(' ')  // Split the string by spaces to handle each word separately
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))  // Capitalize first letter of each word
+    .join(' ');  // Join the words back together
+};
+
+
+export function formatIndianCurrency(number) {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(number);
+}

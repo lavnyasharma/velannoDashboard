@@ -12,7 +12,6 @@ export const signInWithPassword = async ({ username, password }) => {
     localStorage.setItem("username",username)
 
     const res = await axios.post(endpoints.auth.signIn, params);
-    console.log(res.data.access)
 
 
     const  accessToken  = res.data.access;

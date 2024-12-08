@@ -31,9 +31,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
   const collapse = useBoolean();
   const popover = usePopover();
 
-  const handlePrint = async (e,invoice) => {
+  const handlePrint = async (e, invoice) => {
     e.stopPropagation()
-    
+
 
     // Generate PDF blob
     const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
@@ -51,9 +51,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
     iframe.onload = () => {
       iframe.contentWindow.print();
 
-    
+
     };
-}
+  }
 
   const handleRowClick = () => {
     if (collapse.value) {
@@ -116,16 +116,16 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
 
       {/* Add actions table cell */}
       <TableCell align="center">
-      <Tooltip title="Print">
-            <IconButton
-              onClick={(e) => {
-                handlePrint(e,row);
-              }}
-            >
-              <Iconify icon="solar:printer-minimalistic-bold" />
-            </IconButton>
-          </Tooltip>
-        
+        <Tooltip title="Print">
+          <IconButton
+            onClick={(e) => {
+              handlePrint(e, row);
+            }}
+          >
+            <Iconify icon="solar:printer-minimalistic-bold" />
+          </IconButton>
+        </Tooltip>
+
       </TableCell>
     </TableRow>
   );

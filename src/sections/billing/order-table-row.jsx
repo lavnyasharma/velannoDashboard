@@ -22,6 +22,8 @@ import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { usePopover, CustomPopover } from 'src/components/custom-popover';
+import { capitalizeFirstLetter } from 'src/utils/helper';
+import DiscountModalComponent from './order-discount-modal';
 
 // ----------------------------------------------------------------------
 
@@ -31,15 +33,27 @@ export function OrderTableRow({
   selected,
   onAdd,
   onViewRow,
-  onSelectRow,
   onDeleteRow,
+  onDataUpdate
 }) {
   const confirm = useBoolean();
+  const DiscountModal = useBoolean();
 
+  // Sample discount data
+
+  // Based on the is_diamong value, select the appropriate discount
+  const modalTitle = row.is_diamond ? 'Diamond Discount' : 'Silver Discount';
   const collapse = useBoolean();
-
   const popover = usePopover();
 
+
+  const handleDiscountClick = () => {
+    DiscountModal.onTrue(); // Open the modal
+  };
+
+  const handleCloseDiscountModal = () => {
+    DiscountModal.onFalse(); // Close the modal
+  };
   const renderPrimary = (
     <TableRow hover selected={selected}>
       <TableCell padding="checkbox">
@@ -108,13 +122,13 @@ export function OrderTableRow({
         {row.size}
       </TableCell>
 
-      <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+      <TableCell align="center" sx={{ px: 1, whiteSpace: 'nowrap' }}>
         {cart ? (
           <IconButton
             color={collapse.value ? 'inherit' : 'default'}
             onClick={async () => {
               const resp = axiosInstance
-                .post('https://api.velonna.co/cart/', {
+                .post(`/cart/`, {
                   product: row.hsn,
                   quantity: '1',
                 })
@@ -142,6 +156,28 @@ export function OrderTableRow({
           </IconButton>
         )}
       </TableCell>
+
+
+      {cart ? (
+        null
+      ) : (
+        <TableCell align="center" sx={{ px: 1, whiteSpace: 'nowrap' }}><IconButton
+          color={popover.open ? 'inherit' : 'default'}
+          onClick={() => {
+            handleDiscountClick()
+          }}
+        >
+          <Iconify icon="streamline:discount-percent-badge-solid" />
+        </IconButton></TableCell>
+      )}
+      {cart ? (
+        null
+      ) : (
+        <TableCell align="center" sx={{ px: 1, whiteSpace: 'nowrap' }}>
+          {row.discount ? `${capitalizeFirstLetter(row.discount.title)}-${row.discount.percentage}%` : "no discount"}
+        </TableCell>
+      )}
+
     </TableRow>
   );
 
@@ -242,7 +278,7 @@ export function OrderTableRow({
             color="error"
             onClick={() => {
               onDeleteRow();
-              
+
               confirm.onFalse()
             }}
           >
@@ -250,6 +286,8 @@ export function OrderTableRow({
           </Button>
         }
       />
+      <DiscountModalComponent onDiscountUpdate={onDataUpdate} cartItemId={row.id} itemDiscount={row.discount ? row.discount.id : null} is_diamond={row.is_diamond} modalTitle={modalTitle} open={DiscountModal.value} handleCloseDiscountModal={handleCloseDiscountModal} />
+
     </>
   );
 }

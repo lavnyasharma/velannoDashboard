@@ -109,6 +109,18 @@ export const navData = [
             icon: ICONS.invoice,
             roles: ['admin',"counter"],
           },
+          {
+            title: 'Reports',
+            path: paths.dashboard.reports.root,
+            icon: ICONS.file,
+            children: [
+              { title: 'inventory', path: paths.dashboard.reports.root, roles: ['admin', 'counter'] },
+              { title: 'orders', path: paths.dashboard.reports.orders, roles: ['admin', 'counter'] },
+             
+
+            ],
+            roles: ['admin',"counter"],
+          },
         
       
       // {

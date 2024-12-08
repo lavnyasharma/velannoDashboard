@@ -37,16 +37,16 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
   }, [invoice?.id, router]);
 
 
-  const closeOrder = async () =>{
+  const closeOrder = async () => {
     const resp = await axiosInstance
-      .post('https://api.velonna.co/order/counter/', {
-        name: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).name?JSON.parse(localStorage.getItem('userData')).name:"":" ",
-        email: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).email?JSON.parse(localStorage.getItem('userData')).email:"":" ",
-        phone: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).phone?JSON.parse(localStorage.getItem('userData')).phone:"":" ",
-        paymentMethod: localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).paymentMethod?JSON.parse(localStorage.getItem('userData')).paymentMethod:"":" ",
-        f_discount:localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).fDiscount?JSON.parse(localStorage.getItem('userData')).fDiscount:"":" ",
-        silver_discount:localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).silverDiscount?JSON.parse(localStorage.getItem('userData')).silverDiscount:"":" ",
-        diamond_discount:localStorage.getItem('userData')?JSON.parse(localStorage.getItem('userData')).diamondDiscount?JSON.parse(localStorage.getItem('userData')).diamondDiscount:"":" ",
+      .post('/order/counter/', {
+        name: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).name ? JSON.parse(localStorage.getItem('userData')).name : "" : " ",
+        email: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).email ? JSON.parse(localStorage.getItem('userData')).email : "" : " ",
+        phone: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).phone ? JSON.parse(localStorage.getItem('userData')).phone : "" : " ",
+        paymentMethod: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).paymentMethod ? JSON.parse(localStorage.getItem('userData')).paymentMethod : "" : " ",
+        f_discount: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).fDiscount ? JSON.parse(localStorage.getItem('userData')).fDiscount : "" : " ",
+        silver_discount: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).silverDiscount ? JSON.parse(localStorage.getItem('userData')).silverDiscount : "" : " ",
+        diamond_discount: localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')).diamondDiscount ? JSON.parse(localStorage.getItem('userData')).diamondDiscount : "" : " ",
       })
       .then(async (res) => {
         toast.success('Order Created');
@@ -58,29 +58,28 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
       });
   }
   const handlePrint = useCallback(async () => {
-    
-        if (!invoice) return;
 
-        // Generate PDF blob
-        const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
-        const url = URL.createObjectURL(blob);
+    if (!invoice) return;
 
-        // Create a temporary iframe for printing
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none'; // Hide the iframe
-        document.body.appendChild(iframe);
+    // Generate PDF blob
+    const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
+    const url = URL.createObjectURL(blob);
 
-        // Set the source of the iframe to the PDF blob URL
-        iframe.src = url;
-        console.log(url);
+    // Create a temporary iframe for printing
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none'; // Hide the iframe
+    document.body.appendChild(iframe);
 
-        // Trigger print when the iframe loads the PDF
-        iframe.onload = () => {
-          iframe.contentWindow.print();
+    // Set the source of the iframe to the PDF blob URL
+    iframe.src = url;
 
-          confirm.onTrue();
-        };
-  }, [invoice,confirm]);
+    // Trigger print when the iframe loads the PDF
+    iframe.onload = () => {
+      iframe.contentWindow.print();
+
+      confirm.onTrue();
+    };
+  }, [invoice, confirm]);
   const renderDownload = (
     <NoSsr>
       <PDFDownloadLink
@@ -108,7 +107,7 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
         title="Close Order"
         content="Done With Billing? Close Order?"
         action={
-          <Button variant="contained" color="error" onClick={async ()=>{
+          <Button variant="contained" color="error" onClick={async () => {
             closeOrder()
           }}>
             Close Order

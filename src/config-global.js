@@ -7,7 +7,7 @@ import packageJson from '../package.json';
 export const CONFIG = {
   appName: 'velonna dashboard',
   appVersion: packageJson.version,
-  serverUrl: process.env.REACT_APP_SERVER_URL ?? '',
+  serverUrl: process.env.REACT_APP_DEBUG === "true" ? process.env.REACT_APP_TEST_SERVER_URL : process.env.REACT_APP_PROD_SERVER_URL ?? '',
   assetsDir: process.env.REACT_APP_ASSETS_DIR ?? '',
   /**
    * Auth

@@ -84,7 +84,6 @@ export function InvoicePDF({ invoice, currentStatus }) {
     invoiceFrom,
     invoiceNumber,
   } = invoice;
-  console.log(items)
 
   const styles = useStyles();
   const userData = JSON.parse(localStorage.getItem("userData"))

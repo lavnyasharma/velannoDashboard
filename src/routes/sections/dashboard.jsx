@@ -9,6 +9,8 @@ import { LoadingScreen } from 'src/components/loading-screen';
 import { AuthGuard } from 'src/auth/guard';
 // import { SearchByHsn } from 'src/sections/search/view/order-details-view';
 import { SearchByHsnList } from 'src/sections/billing/view/order-list-view';
+import { OrderReportListView } from 'src/sections/reports/orders/view';
+import { ProductReportListView } from 'src/sections/reports/inventory/view';
 
 // ----------------------------------------------------------------------
 
@@ -124,8 +126,14 @@ export const dashboardRoutes = [
         path: 'hsnSearch',
         children: [
           { element: <SearchByHsnList />, index: true },
-          { path: 'list', element: <OrderListPage /> },
-          { path: ':id', element: <OrderDetailsPage /> },
+        ],
+      },
+      {
+        path: 'reports',
+        children: [
+          { path:'inventory',element: <ProductReportListView />, index: true },
+          { path:'orders',element: <OrderReportListView />, index: true },
+
         ],
       },
       {

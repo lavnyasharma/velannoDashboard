@@ -1,26 +1,26 @@
 {
   "primary": {
-    "lighter": "#C8FAD6",
-    "light": "#5BE49B",
-    "main": "#00A76F",
-    "dark": "#007867",
-    "darker": "#004B50",
+    "lighter": "#D9DDE1",
+    "light": "#A9B1B8",
+    "main": "#4A4F55",
+    "dark": "#303438",
+    "darker": "#202325",
     "contrastText": "#FFFFFF"
   },
   "secondary": {
-    "lighter": "#EFD6FF",
-    "light": "#C684FF",
-    "main": "#8E33FF",
-    "dark": "#5119B7",
-    "darker": "#27097A",
+    "lighter": "#D5D8DB",
+    "light": "#9FA5AA",
+    "main": "#565C61",
+    "dark": "#3C4146",
+    "darker": "#2B2F32",
     "contrastText": "#FFFFFF"
   },
   "info": {
-    "lighter": "#CAFDF5",
-    "light": "#61F3F3",
-    "main": "#00B8D9",
-    "dark": "#006C9C",
-    "darker": "#003768",
+    "lighter": "#D6DADE",
+    "light": "#A3ABB2",
+    "main": "#51565B",
+    "dark": "#373B3F",
+    "darker": "#26292C",
     "contrastText": "#FFFFFF"
   },
   "success": {
