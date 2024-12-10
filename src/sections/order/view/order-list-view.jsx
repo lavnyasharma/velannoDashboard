@@ -26,7 +26,7 @@ import {
 } from 'src/components/table';
 import { useTheme } from '@emotion/react';
 import { LoadingIcon } from 'yet-another-react-lightbox';
-import { Divider, Stack, Grid } from '@mui/material';
+import { Divider, Stack, Grid, MenuItem } from '@mui/material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
 import { OrderTableRow } from '../order-table-row';
 import { OrderAnalytic } from '../order-analytics';
@@ -36,77 +36,50 @@ const TABLE_HEAD = [
   { id: 'orderNumber', label: 'Order', width: 88 },
   { id: 'name', label: 'Customer' },
   { id: 'createdAt', label: 'Date', width: 140 },
-  { id: 'totalQuantity', label: 'Items', width: 120, align: 'center' },
+  { id: 'total', label: 'Total', width: 120, align: 'center' },
+  { id: 'discount', label: 'Discount', width: 120, align: 'center' },
   { id: 'totalAmount', label: 'Price', width: 140 },
   { id: 'paymentmethod', label: 'Payment Method', width: 140 },
   { id: 'actions', label: 'Actions', width: 140 },
 ];
-
 export function OrderListView() {
-  const [term, setTerm] = useState('')
   const [listData, setListData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [searchTerm, setSearchTerm] = useState(''); // Added search term state
+  const [searchTerm, setSearchTerm] = useState('');
+  const [month, setMonth] = useState(new Date().getMonth() + 1); // Default to current month
+  const [year, setYear] = useState(new Date().getFullYear()); // Default to current year
   const theme = useTheme();
+  const table = useTable({ defaultOrderBy: 'hsn', defaultRowsPerPage: rowsPerPage });
 
-  const [summaryData, setSummaryData] = useState({});
-
-  const table = useTable({
-    defaultOrderBy: 'hsn',
-    defaultRowsPerPage: rowsPerPage,
-  });
-
-  const router = useRouter();
-  const confirm = useBoolean();
-
-  const getListData = useCallback(async (limit, offset) => {
+  const getListData = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
-        limit,
-        offset,
-        start_date: startDate || undefined,
-        end_date: endDate || undefined,
-        search: searchTerm || undefined, // Include search term in the params
+        limit: rowsPerPage,
+        offset: page * rowsPerPage,
+        month,
+        year,
+        search: searchTerm || undefined,
       };
 
       const { data } = await axiosInstance.get('/order-lists/', { params });
       setListData(data.results);
       setTotalRows(data.count);
     } catch (error) {
-      toast.error('Error fetching orders');
+      console.error(error);
     }
     setLoading(false);
-  }, [startDate, endDate, searchTerm]); // Add searchTerm to the dependencies
-
-  const getSummaryData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = {
-        start_date: startDate || undefined,
-        end_date: endDate || undefined,
-      };
-
-      const { data } = await axiosInstance.get('/order/summary/seller/', { params });
-      setSummaryData(data);
-    } catch (error) {
-      toast.error('Error fetching orders');
-    }
-    setLoading(false);
-  }, [startDate, endDate]);
+  }, [rowsPerPage, page, month, year, searchTerm]);
 
   useEffect(() => {
-    getListData(rowsPerPage, page * rowsPerPage);
-    getSummaryData();
-  }, [getListData, getSummaryData, page, rowsPerPage]);
+    getListData();
+  }, [getListData]);
 
   const handlePageChange = (event, newPage) => {
-    setListData([])
+    setListData([]);
     setPage(newPage);
   };
 
@@ -116,196 +89,78 @@ export function OrderListView() {
     setPage(0);
   };
 
-  const handleDateChange = (event, isStart) => {
-    const date = event.target.value;
-    if (isStart) {
-      setStartDate(date);
-    } else {
-      setEndDate(date);
-    }
-    setPage(0);
-  };
-
   const handleResetFilters = () => {
-    setStartDate('');
-    setEndDate('');
-    setSearchTerm(''); // Reset the search term
+    setMonth(new Date().getMonth() + 1); // Reset to current month
+    setYear(new Date().getFullYear()); // Reset to current year
+    setSearchTerm('');
     setPage(0);
-    setTerm('')
   };
-
-  const handleViewRow = useCallback(
-    (id) => {
-      router.push(paths.dashboard.order.details(id));
-    },
-    [router]
-  );
 
   return (
-    <DashboardContent>
-      <CustomBreadcrumbs
-        heading="List"
-        links={[
-          { name: 'Dashboard', href: paths.dashboard.root },
-          { name: 'Order', href: paths.dashboard.order.root },
-          { name: 'List' },
-        ]}
-        sx={{ mb: { xs: 3, md: 5 } }}
-      />
-
-      {Object.keys(summaryData).length !== 0 ? (
-        <Card sx={{ mb: { xs: 3, md: 5 } }}>
-          <Scrollbar sx={{ minHeight: 108 }}>
-            <Stack
-              direction="row"
-              divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
-              sx={{ py: 2 }}
-            >
-              <OrderAnalytic
-                title="Total"
-                total={summaryData?.total_sales_summary?.total_quantity}
-                percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_sales_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
-                weight={summaryData?.total_sales_summary?.total_weight}
-                price={summaryData?.total_sales_summary?.total_price}
-                icon="solar:bill-list-bold-duotone"
-                color={theme.vars.palette.info.main}
-              />
-
-              <OrderAnalytic
-                title="Diamond"
-                total={summaryData?.diamond_sales?.total_sales}
-                percent={(((summaryData?.total_diamond ?? 0) - (summaryData?.diamond_sales?.total_sales ?? 0)) / (summaryData?.total_diamond ?? 1)) * 100}
-                weight={summaryData?.diamond_sales?.total_weight}
-                price={summaryData?.diamond_sales?.total_price}
-                icon="material-symbols:diamond"
-                color={theme.vars.palette.success.main}
-              />
-
-              <OrderAnalytic
-                title="Silver"
-                total={summaryData?.silver_sales?.total_sales}
-                percent={(((summaryData?.total_silver ?? 0) - (summaryData?.silver_sales?.total_sales ?? 0)) / (summaryData?.total_silver ?? 1)) * 100}
-                weight={summaryData?.silver_sales?.total_weight}
-                price={summaryData?.silver_sales?.total_price}
-                icon="mdi:podium-silver"
-                color={theme.vars.palette.warning.main}
-              />
-            </Stack>
-          </Scrollbar>
-        </Card>
-      ) : (
-        ''
-      )}
-
-      <Card sx={{ mb: { xs: 3, md: 5 } }}>
-        <Accordion defaultExpanded={false}>
-          <AccordionSummary
-            expandIcon={<GridExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
+    <Card>
+      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            select
+            label="Month"
+            value={month}
+            onChange={(e) => setMonth(Number(e.target.value))}
+            variant="outlined"
+            sx={{ width: 150 }}
           >
-            <Typography variant="h6">Category wise Sales</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Scrollbar sx={{ minHeight: 500 }}>
-              <Grid container spacing={3} padding={5}>
-                {summaryData?.category_sales?.map((category) => (
-                  <Grid item xs={12} sm={6} md={4} key={category.product__category__name}>
-                    <Card>
-                      <Box sx={{ p: 2 }}>
-                        <Typography variant="subtitle1" gutterBottom>
-                          {category.product__category__name.charAt(0).toUpperCase() + category.product__category__name.slice(1)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Total Sold:</strong> {category.total_sold}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Total Price:</strong> ₹{category.total_price.toLocaleString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          <strong>Total Weight:</strong> {category.total_weight}g
-                        </Typography>
-                      </Box>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </Scrollbar>
-          </AccordionDetails>
-        </Accordion>
-      </Card>
-
-      <Card>
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <TextField
-              label="Search"
-              value={term}
-              onChange={(e) => {
-                setTerm(e.target.value)
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setSearchTerm(term);
-                  setPage(0); // Reset to the first page on search
-                }
-
-              }}
-
-              variant="outlined"
-              sx={{ width: 250 }}
-            />
-            <TextField
-              label="Start Date"
-              type="date"
-              value={startDate}
-              onChange={(e) => handleDateChange(e, true)}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              label="End Date"
-              type="date"
-              value={endDate}
-              onChange={(e) => handleDateChange(e, false)}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <Button onClick={handleResetFilters}>Reset Filters</Button>
-          </Box>
+            {[...Array(12)].map((_, i) => (
+              <MenuItem key={i} value={i + 1}>
+                {new Date(0, i).toLocaleString('default', { month: 'long' })}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            select
+            label="Year"
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+            variant="outlined"
+            sx={{ width: 150 }}
+          >
+            {[...Array(5)].map((_, i) => (
+              <MenuItem key={i} value={new Date().getFullYear() - i}>
+                {new Date().getFullYear() - i}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && setPage(0)}
+            variant="outlined"
+            sx={{ width: 250 }}
+          />
+          <Button onClick={handleResetFilters}>Reset Filters</Button>
         </Box>
-        <Scrollbar sx={{ minHeight: 444 }}>
-          <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-            <TableHeadCustom headLabel={TABLE_HEAD} />
-            <TableBody>
-              {loading ? (
-                <TableNoData colSpan={TABLE_HEAD.length} />
-              ) : (
-                listData.map((row) => (
-                  <OrderTableRow key={row.id} row={row}  onSelectRow={() => table.onSelectRow(row.id)} onViewRow={() => handleViewRow(row.id)} />
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </Scrollbar>
-        <TablePaginationCustom
-          rowsPerPageOptions={[5, 10, 25]}
-          count={totalRows}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
-        />
-      </Card>
-      <ConfirmDialog
-        open={confirm.open}
-        onClose={confirm.onClose}
-        title="Confirmation"
-        content="Are you sure you want to delete this order?"
-        onConfirm={confirm.onConfirm}
+      </Box>
+      <Scrollbar sx={{ minHeight: 444 }}>
+        <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+          <TableHeadCustom headLabel={TABLE_HEAD} />
+          <TableBody>
+            {loading ? (
+              <TableNoData colSpan={TABLE_HEAD.length} />
+            ) : (
+              listData.map((row) => (
+                <OrderTableRow key={row.id} row={row} />
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </Scrollbar>
+      <TablePaginationCustom
+        rowsPerPageOptions={[5, 10, 25]}
+        count={totalRows}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
       />
-    </DashboardContent>
+    </Card>
   );
 }

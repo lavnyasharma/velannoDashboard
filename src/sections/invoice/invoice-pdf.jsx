@@ -70,32 +70,25 @@ const useStyles = () =>
 
 // ----------------------------------------------------------------------
 
-export function InvoicePDF({ invoice, currentStatus }) {
+export function InvoicePDF({ invoice }) {
   const {
-    items,
-    taxes,
-    dueDate,
-    discount,
-    shipping,
-    subtotal,
-    invoiceTo,
+    order_number,
+    customer,
     createDate,
-    totalAmount,
-    invoiceFrom,
-    invoiceNumber,
+    subtotal,
+    final_total,
+    diamond_discount,
+    silver_discount,
+    f_discount,
+    franchise_discount_amount,
+    order_items,
   } = invoice;
 
   const styles = useStyles();
-  const userData = JSON.parse(localStorage.getItem("userData"))
 
   const renderHeader = (
     <View style={[styles.container, styles.mb40]}>
-      <Image src="/logo/logo-full.png" style={{ width: 130, }} />
-
-      {/* <View style={{ alignItems: 'flex-end', flexDirection: 'column' }}>
-         <Text style={[styles.h3, { textTransform: 'capitalize' }]}>{currentStatus}</Text> 
-        <Text>  </Text>
-      </View> */}
+      <Image src="/logo/logo-full.png" style={{ width: 130 }} />
     </View>
   );
 
@@ -103,12 +96,8 @@ export function InvoicePDF({ invoice, currentStatus }) {
     <View style={[styles.container, styles.footer]} fixed>
       <View style={{ width: '75%' }}>
         <Text style={styles.subtitle2}>NOTES</Text>
-        <Text>
-          We appreciate your business.
-        </Text>
-        <Text>
-          This is not an official bill.
-        </Text>
+        <Text>We appreciate your business.</Text>
+        <Text>This is not an official bill.</Text>
       </View>
       <View style={{ width: '25%', textAlign: 'right' }}>
         <Text style={styles.subtitle2}>Have a question?</Text>
@@ -119,17 +108,17 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
   const renderInfo = (
     <View style={[styles.container]}>
-      <View style={{ width: '100%' }}>
+      <View style={{ width: '50%' }}>
         <Text style={[styles.subtitle2, styles.mb4]}>Estimate from</Text>
         <Text style={styles.body2}>Velonna.co</Text>
-        <Text style={styles.body2}>Contact us on: info@velonnna.co</Text>
+        <Text style={styles.body2}>info@velonna.co</Text>
       </View>
 
       <View style={{ width: '50%' }}>
         <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
-        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).name}</Text>
-        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).email}</Text>
-        <Text style={styles.body2}>  {JSON.parse(localStorage.getItem("userData")).phone}</Text>
+        <Text style={styles.body2}>{customer.name}</Text>
+        <Text style={styles.body2}>{customer.email}</Text>
+        <Text style={styles.body2}>{customer.phone}</Text>
       </View>
     </View>
   );
@@ -137,7 +126,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
   const renderTime = (
     <View style={[styles.container, styles.mb40]}>
       <View style={{ width: '50%' }}>
-        <Text style={[styles.subtitle2, styles.mb4]}>Date create</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>Date created</Text>
         <Text style={styles.body2}>{fDate(createDate)}</Text>
       </View>
     </View>
@@ -145,7 +134,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
   const renderTable = (
     <>
-      <Text style={[styles.subtitle1, styles.mb8]}>Invoice details</Text>
+      <Text style={[styles.subtitle1, styles.mb8]}>Invoice Details</Text>
 
       <View style={styles.table}>
         <View>
@@ -154,7 +143,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
               <Text style={styles.subtitle2}>#</Text>
             </View>
             <View style={styles.cell_2}>
-              <Text style={styles.subtitle2}>Name (Unit Price)</Text>
+              <Text style={styles.subtitle2}>Product (Unit Price)</Text>
             </View>
             <View style={styles.cell_3}>
               <Text style={styles.subtitle2}>Weight</Text>
@@ -172,8 +161,8 @@ export function InvoicePDF({ invoice, currentStatus }) {
         </View>
 
         <View>
-          {items.map((item, index) => (
-            <View key={item.id} style={styles.row}>
+          {order_items.map((item, index) => (
+            <View key={item.product.id} style={styles.row}>
               <View style={styles.cell_1}>
                 <Text>{index + 1}</Text>
               </View>
@@ -185,25 +174,27 @@ export function InvoicePDF({ invoice, currentStatus }) {
                 <Text>{`${item.product.gross_weight}g`}</Text>
               </View>
               <View style={styles.cell_4}>
-                <Text>{item.product.quantity}</Text>
+                <Text>{item.quantity}</Text>
               </View>
               <View style={styles.cell_4}>
-                <Text align="right">{item.product.is_gold ? userData.diamondDiscount : userData.silverDiscount}</Text>
+                <Text>{item.product.is_gold ? diamond_discount : silver_discount}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text>{item.product.is_gold ? fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * cDiscount(userData.diamondDiscount)) : fCurrency((item.product.price * item.product.quantity) - ((item.product.price * item.product.quantity)) * cDiscount(userData.silverDiscount))}</Text>
+                <Text>
+                  {fCurrency(
+                    item.total -
+                      item.total * cDiscount(item.product.is_gold ? diamond_discount : silver_discount)
+                  )}
+                </Text>
               </View>
             </View>
           ))}
 
           {[
-            { name: 'Subtotal', value: fCurrency(subtotal[1]) },
-            { name: "Additional", value: JSON.parse(localStorage.getItem("userData")).fDiscount.includes("%") ? `-${JSON.parse(localStorage.getItem("userData")).fDiscount}` : `-${fCurrency(cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount))}` },
-            // { name: 'Shipping', value: -shipping },
-            { name: 'Discount', value: `-${fCurrency(subtotal[1] - subtotal[0])}` },
-           
-            
-            { name: 'Total', value: fCurrency(subtotal[0]), styles: styles.h4 },
+            { name: 'Subtotal', value: fCurrency(subtotal) },
+            { name: 'Franchise Discount', value: `-${fCurrency(franchise_discount_amount)}` },
+            { name: 'Additional Discount', value: f_discount },
+            { name: 'Total', value: fCurrency(final_total), styles: styles.h4 },
           ].map((item) => (
             <View key={item.name} style={[styles.row, styles.noBorder]}>
               <View style={styles.cell_1} />
@@ -213,7 +204,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
                 <Text style={item.styles}>{item.name}</Text>
               </View>
               <View style={[styles.cell_5, { textAlign: 'right' }]}>
-                <Text style={item.styles}>{(item.value)}</Text>
+                <Text style={item.styles}>{item.value}</Text>
               </View>
             </View>
           ))}

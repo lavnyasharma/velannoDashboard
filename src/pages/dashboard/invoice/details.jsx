@@ -17,22 +17,23 @@ const metadata = { title: `Invoice details | Dashboard - ${CONFIG.appName}` };
 
 export default function Page() {
   const router = useRouter()
-  const { id = '' } = useParams();
-  const getCartData = async () => {
-    const resp = await axiosInstance.get('/cart/').then((res) => {
-      if (res.data.count === 0) {
+  const { id } = useParams();
+  console.log(id)
+  const getOrder = async () => {
+    const resp = await axiosInstance.get(`/order/${id}/`).then((res) => {
+      if (Object.keys(res.data).length === 0) {
         router.push(paths.dashboard.search.root)
       }
-      
-      setCart(res.data.results);
+
+      setOrder(res.data);
     });
   };
-  const [cart, setCart] = useState([])
+  const [order, setOrder] = useState({})
   useEffect(() => {
-
-    getCartData()
+    getOrder()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+  // <InvoiceDetailsView invoice={cart} /> 
 
   return (
     <>
@@ -40,7 +41,9 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      {cart.length === 0 ? <LoadingScreen /> : <InvoiceDetailsView invoice={cart} />}
+      {Object.keys(order).length === 0 ? <LoadingScreen /> :
+       <InvoiceDetailsView invoice={order} /> 
+      }
     </>
   );
 }

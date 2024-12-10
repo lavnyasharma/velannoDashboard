@@ -44,8 +44,6 @@ export function InvoiceDetails({ invoice }) {
   }, []);
   const cardRef = useRef();
 
-
-
   const renderTotal = (
     <>
       <StyledTableRow>
@@ -56,31 +54,35 @@ export function InvoiceDetails({ invoice }) {
         </TableCell>
         <TableCell width={120} sx={{ typography: 'subtitle2' }}>
           <Box sx={{ mt: 2 }} />
-          {fCurrency(invoice?.subtotal[1])}
+          {fCurrency(invoice?.subtotal)}
         </TableCell>
       </StyledTableRow>
 
-      {cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount) !== "0" ? <StyledTableRow>
-        <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Additional</TableCell>
-        <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          {JSON.parse(localStorage.getItem("userData")).fDiscount.includes("%") ? `-${JSON.parse(localStorage.getItem("userData")).fDiscount}` : `-${fCurrency(cDiscount(JSON.parse(localStorage.getItem("userData")).fDiscount))}`}
-        </TableCell>
-      </StyledTableRow> : ""}
+      {invoice.f_discount !== "0%" && (
+        <StyledTableRow>
+          <TableCell colSpan={3} />
+          <TableCell sx={{ color: 'text.secondary' }}>Additional</TableCell>
+          <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
+            {invoice.f_discount.includes("%")
+              ? `-${invoice.f_discount}`
+              : `-${fCurrency(cDiscount(invoice.f_discount))}`}
+          </TableCell>
+        </StyledTableRow>
+      )}
+
       <StyledTableRow>
         <TableCell colSpan={3} />
-        <TableCell sx={{ color: 'text.secondary' }}>Discount</TableCell>
+        <TableCell sx={{ color: 'text.secondary' }}>Franchise Discount</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-          {`-${fCurrency((invoice?.subtotal?.[1] || 0) - (invoice?.subtotal?.[0] || 0))}`}
+          {`-${fCurrency(invoice.franchise_discount_amount)}`}
         </TableCell>
       </StyledTableRow>
 
-
       <StyledTableRow>
         <TableCell colSpan={3} />
-        <TableCell sx={{ typography: 'subtitle1' }}>Total</TableCell>
+        <TableCell sx={{ typography: 'subtitle1' }}>Final Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {fCurrency(Number(invoice?.subtotal[0]))}
+          {fCurrency(invoice.final_total)}
         </TableCell>
       </StyledTableRow>
     </>
@@ -110,39 +112,43 @@ export function InvoiceDetails({ invoice }) {
         <TableHead>
           <TableRow>
             <TableCell width={40}>#</TableCell>
-
             <TableCell sx={{ typography: 'subtitle2' }}>Description</TableCell>
-
             <TableCell>Qty</TableCell>
-
             <TableCell align="right">Unit price</TableCell>
             <TableCell align="right">Discount</TableCell>
-
             <TableCell align="right">Total</TableCell>
           </TableRow>
         </TableHead>
 
         <TableBody>
-          {invoice?.items.map((row, index) => (
+          {invoice.order_items.map((item, index) => (
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
-
               <TableCell>
                 <Box sx={{ maxWidth: 560 }}>
-                  <Typography variant="subtitle2">{row.product.title}</Typography>
-
+                  <Typography variant="subtitle2">{item.product.title}</Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-                    {`${row.product.gross_weight}g`}
+                    {`${item.product.gross_weight}g`}
                   </Typography>
                 </Box>
               </TableCell>
-
-              <TableCell>{row.product.quantity}</TableCell>
-
-              <TableCell align="right">{fCurrency(row.product.price)}</TableCell>
-              <TableCell align="right">{row.product.is_gold ? JSON.parse(localStorage.getItem("userData")).diamondDiscount : JSON.parse(localStorage.getItem("userData")).silverDiscount}</TableCell>
-
-              <TableCell align="right">{row.product.is_gold ? fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * cDiscount(JSON.parse(localStorage.getItem("userData")).diamondDiscount)) : fCurrency((row.product.price * row.product.quantity) - ((row.product.price * row.product.quantity)) * cDiscount(JSON.parse(localStorage.getItem("userData")).silverDiscount))}</TableCell>
+              <TableCell>{item.quantity}</TableCell>
+              <TableCell align="right">{fCurrency(item.product.price)}</TableCell>
+              <TableCell align="right">
+                {item.product.is_gold
+                  ? invoice.diamond_discount
+                  : invoice.silver_discount}
+              </TableCell>
+              <TableCell align="right">
+                {fCurrency(
+                  item.total -
+                    item.total * cDiscount(
+                      item.product.is_gold
+                        ? invoice.diamond_discount
+                        : invoice.silver_discount
+                    )
+                )}
+              </TableCell>
             </TableRow>
           ))}
 
@@ -176,19 +182,7 @@ export function InvoiceDetails({ invoice }) {
           />
 
           <Stack spacing={1} alignItems={{ xs: 'flex-start', md: 'flex-end' }}>
-            {/* <Label
-              variant="soft"
-              color={
-                (currentStatus === 'paid' && 'success') ||
-                (currentStatus === 'pending' && 'warning') ||
-                (currentStatus === 'overdue' && 'error') ||
-                'default'
-              }
-            >
-             
-            </Label> */}
-
-            <Typography variant="h6">{invoice?.invoiceNumber}</Typography>
+            <Typography variant="h6">{invoice.order_number}</Typography>
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
@@ -197,7 +191,7 @@ export function InvoiceDetails({ invoice }) {
             </Typography>
             Velonna.co
             <br />
-            info@velonnna.co
+            info@velonna.co
             <br />
             contact: contact@velonna.co
             <br />
@@ -207,11 +201,11 @@ export function InvoiceDetails({ invoice }) {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Estimate to
             </Typography>
-            {JSON.parse(localStorage.getItem("userData")).name}
+            {invoice.customer.name}
             <br />
-            {JSON.parse(localStorage.getItem("userData")).email}
+            {invoice.customer.email}
             <br />
-            Phone: {JSON.parse(localStorage.getItem("userData")).phone}
+            Phone: {invoice.customer.phone}
             <br />
           </Stack>
 
@@ -219,14 +213,14 @@ export function InvoiceDetails({ invoice }) {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Date create
             </Typography>
-            {fDate(invoice?.createDate)}
+            {fDate(invoice.created)}
           </Stack>
 
           <Stack sx={{ typography: 'body2' }}>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Due date
             </Typography>
-            {fDate(invoice?.dueDate)}
+            {fDate(invoice.due_date)}
           </Stack>
         </Box>
 
@@ -236,8 +230,6 @@ export function InvoiceDetails({ invoice }) {
 
         {renderFooter}
       </Card>
-
-
     </>
   );
 }

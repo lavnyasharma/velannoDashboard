@@ -69,29 +69,22 @@ const useStyles = () =>
     );
 
 // ----------------------------------------------------------------------
-export function InvoicePDF({ invoice, currentStatus }) {
+
+export function InvoicePDF({ invoice }) {
     const {
-        items,
-        createDate,
-        cname,       // Customer name
-        email,       // Customer email
-        phone,       // Customer phone
         order_number,
+        customer,
+        createDate,
+        subtotal,
+        final_total,
         diamond_discount,
         silver_discount,
-        f_discount
+        f_discount,
+        franchise_discount_amount,
+        order_items,
     } = invoice;
 
     const styles = useStyles();
-    const discountsilverpercent = cDiscount(silver_discount)
-    const discountdiamondpercent = cDiscount(diamond_discount)
-    const fDiscount = cDiscount(f_discount)
-    // Calculate the subtotal from the items if not explicitly provided
-    const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
-    const totalAmount = items.reduce((acc, item) => acc + item.total, 0);
-    const finalTotal = fDiscount < 1 && fDiscount > 0 ? totalAmount - (totalAmount * fDiscount) : totalAmount - fDiscount
-    const discount = subtotal - totalAmount
-
 
     const renderHeader = (
         <View style={[styles.container, styles.mb40]}>
@@ -115,17 +108,17 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
     const renderInfo = (
         <View style={[styles.container]}>
-            <View style={{ width: '100%' }}>
+            <View style={{ width: '50%' }}>
                 <Text style={[styles.subtitle2, styles.mb4]}>Estimate from</Text>
                 <Text style={styles.body2}>Velonna.co</Text>
-                <Text style={styles.body2}>Contact us: info@velonna.co</Text>
+                <Text style={styles.body2}>info@velonna.co</Text>
             </View>
 
             <View style={{ width: '50%' }}>
                 <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
-                <Text style={styles.body2}>{cname || ''}</Text>
-                <Text style={styles.body2}>{email || ''}</Text>
-                <Text style={styles.body2}>{phone || ''}</Text>
+                <Text style={styles.body2}>{customer?customer.name:''}</Text>
+                <Text style={styles.body2}>{customer?customer.email:""}</Text>
+                <Text style={styles.body2}>{customer?customer.phone:''}</Text>
             </View>
         </View>
     );
@@ -141,7 +134,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
     const renderTable = (
         <>
-            <Text style={[styles.subtitle1, styles.mb8]}>Invoice details</Text>
+            <Text style={[styles.subtitle1, styles.mb8]}>Invoice Details</Text>
 
             <View style={styles.table}>
                 <View>
@@ -150,7 +143,7 @@ export function InvoicePDF({ invoice, currentStatus }) {
                             <Text style={styles.subtitle2}>#</Text>
                         </View>
                         <View style={styles.cell_2}>
-                            <Text style={styles.subtitle2}>Name (Unit Price)</Text>
+                            <Text style={styles.subtitle2}>Product (Unit Price)</Text>
                         </View>
                         <View style={styles.cell_3}>
                             <Text style={styles.subtitle2}>Weight</Text>
@@ -168,8 +161,8 @@ export function InvoicePDF({ invoice, currentStatus }) {
                 </View>
 
                 <View>
-                    {items.map((item, index) => (
-                        <View key={item.id} style={styles.row}>
+                    {order_items.map((item, index) => (
+                        <View key={item.product.id} style={styles.row}>
                             <View style={styles.cell_1}>
                                 <Text>{index + 1}</Text>
                             </View>
@@ -184,13 +177,14 @@ export function InvoicePDF({ invoice, currentStatus }) {
                                 <Text>{item.quantity}</Text>
                             </View>
                             <View style={styles.cell_4}>
-                                <Text>{item.product.is_gold ? `${discountdiamondpercent * 100}%` : `${discountsilverpercent * 100}%`}</Text>
+                                <Text>{item.product.is_gold ? diamond_discount : silver_discount}</Text>
                             </View>
                             <View style={[styles.cell_5, { textAlign: 'right' }]}>
                                 <Text>
-                                    {fCurrency(item.product.is_gold
-                                        ? (item.product.price * item.quantity) * (1 - discountdiamondpercent)
-                                        : (item.product.price * item.quantity) * (1 - discountsilverpercent))}
+                                    {fCurrency(
+                                        item.total -
+                                        item.total * cDiscount(item.product.is_gold ? diamond_discount : silver_discount)
+                                    )}
                                 </Text>
                             </View>
                         </View>
@@ -198,9 +192,9 @@ export function InvoicePDF({ invoice, currentStatus }) {
 
                     {[
                         { name: 'Subtotal', value: fCurrency(subtotal) },
-                        { name: 'Additional', value: `-${fDiscount}` },
-                        { name: 'Discount', value: `-${fCurrency(discount)}` },
-                        { name: 'Total', value: fCurrency(finalTotal), styles: styles.h4 },
+                        { name: 'Franchise Discount', value: `-${fCurrency(franchise_discount_amount)}` },
+                        { name: 'Additional Discount', value: f_discount },
+                        { name: 'Total', value: fCurrency(final_total), styles: styles.h4 },
                     ].map((item) => (
                         <View key={item.name} style={[styles.row, styles.noBorder]}>
                             <View style={styles.cell_1} />
@@ -223,9 +217,13 @@ export function InvoicePDF({ invoice, currentStatus }) {
         <Document>
             <Page size="A4" style={styles.page}>
                 {renderHeader}
+
                 {renderInfo}
+
                 {renderTime}
+
                 {renderTable}
+
                 {renderFooter}
             </Page>
         </Document>

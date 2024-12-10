@@ -102,8 +102,6 @@ export function SearchByHsnList() {
     const fetchSalesPersons = async () => {
       try {
         const response = await axiosInstance.get(`/salesperson/counter/`, {
-          // Add any necessary headers, for example:
-          // headers: { 'Authorization': 'Bearer <token>' },
         });
         setSalesPersons(response.data);
       } catch (error) {
@@ -230,16 +228,27 @@ export function SearchByHsnList() {
     }
   };
 
-  const handleConfirmOrder = () => {
-    const savedData = JSON.parse(localStorage.getItem('userData'));
-    if (localStorage.getItem('userData') && Object.keys(JSON.parse(localStorage.getItem('userData'))).length === 3) {
-      localStorage.removeItem('userData')
-      return
+  const handleConfirmOrder = async () => {
+    // const savedData = JSON.parse(localStorage.getItem('userData'));
+    // if (localStorage.getItem('userData') && Object.keys(JSON.parse(localStorage.getItem('userData'))).length === 3) {
+    //   localStorage.removeItem('userData')
+    //   return
+    // }
+    // if (savedData) {
+    //   setUserData(savedData); // Pre-fill modal fields if data exists
+    // }
+    // setOpenModal(true); // Open the modal on Confirm Order click
+    try {
+      const response = await axiosInstance.post(`/confirm/order/`).then((res) => {
+        console.log(res.data.order_number)
+        router.push(paths.dashboard.invoice.details(res.data.order_number))
+        toast.success('Order confirmed successfully!');
+      }).catch((error) => {
+        toast.error(`Failed! ${error}`);
+      })
+    } catch (error) {
+      toast.error('Error confirming order');
     }
-    if (savedData) {
-      setUserData(savedData); // Pre-fill modal fields if data exists
-    }
-    setOpenModal(true); // Open the modal on Confirm Order click
   };
 
 
@@ -304,9 +313,9 @@ export function SearchByHsnList() {
 
   const handleOrderSubmission = () => {
     // Proceed with order submission process
-    router.push(paths.dashboard.invoice.details("productinvoice"));
-    setOpenModal(false); // Close the modal after submission
-    toast.success('Order confirmed!');
+    // router.push(paths.dashboard.invoice.details("productinvoice"));
+    // setOpenModal(false); // Close the modal after submission
+    // toast.success('Order confirmed!');
   };
 
   const handleCloseModal = () => {

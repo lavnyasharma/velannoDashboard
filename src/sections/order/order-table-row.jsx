@@ -88,9 +88,12 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
               alignItems: 'flex-start',
             }}
           >
-            <Box component="span">{row.cname ? row.cname : `Anon Customer`}</Box>
+            <Box component="span">{row.cname ? row.cname : row.customer?row.customer.name:`Anon Customer`}</Box>
             <Box component="span" sx={{ color: 'text.disabled' }}>
-              {row.email ? row.email : ''}
+              {row.email ? row.email :row.customer?row.customer.email:`No Email`}
+            </Box>
+            <Box component="span" sx={{ color: 'text.disabled',justifyContent:"center",display:"flex" }}>
+            <Iconify icon="mynaui:cake" /> {`-${row.birthday ? row.birthday :row.customer?fDate(row.customer.birthday):`-`}`}
             </Box>
           </Stack>
         </Stack>
@@ -109,9 +112,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
         />
       </TableCell>
 
-      <TableCell align="center"> {row.items.length} </TableCell>
-
-      <TableCell> {fCurrency(row.items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
+      <TableCell align="center"> {row.total?fCurrency(row.total):"-"} </TableCell>
+      <TableCell align="center"> {row.total_discount || row.franchise_discount_amount?fCurrency(row.total_discount+row.franchise_discount_amount || row.total_discount || row.franchise_discount_amount):'-'} </TableCell>
+      <TableCell> {row.final_total ?fCurrency(row.final_total):fCurrency(row.order_items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
       <TableCell> {row.payment_method ? row.payment_method.toUpperCase() : ''} </TableCell>
 
       {/* Add actions table cell */}
@@ -119,7 +122,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
       <Tooltip title="Print">
             <IconButton
               onClick={(e) => {
+                console.log(row)
                 handlePrint(e,row);
+
               }}
             >
               <Iconify icon="solar:printer-minimalistic-bold" />
@@ -140,7 +145,7 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
           sx={{ bgcolor: 'background.neutral' }}
         >
           <Paper sx={{ m: 1.5 }}>
-            {row.items.map((item) => (
+            {row.order_items.map((item) => (
               <Stack
                 key={item.id}
                 direction="row"
