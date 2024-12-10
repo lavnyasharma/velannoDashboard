@@ -80,6 +80,7 @@ export function InvoicePDF({ invoice }) {
     diamond_discount,
     silver_discount,
     f_discount,
+    cname, email, phone,
     franchise_discount_amount,
     order_items,
   } = invoice;
@@ -116,9 +117,9 @@ export function InvoicePDF({ invoice }) {
 
       <View style={{ width: '50%' }}>
         <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
-        <Text style={styles.body2}>{customer.name}</Text>
-        <Text style={styles.body2}>{customer.email}</Text>
-        <Text style={styles.body2}>{customer.phone}</Text>
+        <Text style={styles.body2}>{customer ? customer.name : cname}</Text>
+        <Text style={styles.body2}>{customer ? customer.phone : phone}</Text>
+        <Text style={styles.body2}>{customer ? customer.email : email}</Text>
       </View>
     </View>
   );
@@ -183,7 +184,7 @@ export function InvoicePDF({ invoice }) {
                 <Text>
                   {fCurrency(
                     item.total -
-                      item.total * cDiscount(item.product.is_gold ? diamond_discount : silver_discount)
+                    item.total * cDiscount(item.product.is_gold ? diamond_discount : silver_discount)
                   )}
                 </Text>
               </View>

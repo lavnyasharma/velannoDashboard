@@ -201,11 +201,11 @@ export function InvoiceDetails({ invoice }) {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Estimate to
             </Typography>
-            {invoice.customer.name}
+            {invoice.customer?invoice.customer.name:invoice.cname}
             <br />
-            {invoice.customer.email}
+            {invoice.customer?invoice.customer.email:invoice.email}
             <br />
-            Phone: {invoice.customer.phone}
+            Phone: {invoice.customer?invoice.customer.phone:invoice.phone}
             <br />
           </Stack>
 
