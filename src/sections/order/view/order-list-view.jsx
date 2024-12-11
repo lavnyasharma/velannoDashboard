@@ -17,8 +17,9 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { useTable, TableNoData, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
 import { useTheme } from '@emotion/react';
-import { Divider, Stack, Grid, MenuItem } from '@mui/material';
+import { Divider, Stack, Grid, MenuItem, IconButton } from '@mui/material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
+import { Iconify } from 'src/components/iconify';
 import { OrderTableRow } from '../order-table-row';
 import { OrderAnalytic } from '../order-analytics';
 
@@ -42,6 +43,7 @@ export function OrderListView() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchTermS, setSearchTermS] = useState('');
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const theme = useTheme();
@@ -113,46 +115,78 @@ export function OrderListView() {
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
-      {Object.keys(summaryData).length > 0 && (
+      {Object.keys(summaryData).length !== 0 ? (
         <Card sx={{ mb: { xs: 3, md: 5 } }}>
           <Scrollbar sx={{ minHeight: 108 }}>
             <Stack
               direction="row"
-              divider={<Divider orientation="vertical" flexItem />}
+              divider={<Divider orientation="vertical" flexItem sx={{ borderStyle: 'dashed' }} />}
               sx={{ py: 2 }}
             >
               <OrderAnalytic
                 title="Total"
                 total={summaryData?.total_sales_summary?.total_quantity}
-                price={summaryData?.total_sales_summary?.total_price}
+                percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_sales_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
                 weight={summaryData?.total_sales_summary?.total_weight}
+                price={summaryData?.total_sales_summary?.total_price}
                 icon="solar:bill-list-bold-duotone"
                 color={theme.vars.palette.info.main}
               />
-              {/* Add similar sections for Diamond, Silver, and other categories */}
+
+              <OrderAnalytic
+                title="Diamond"
+                total={summaryData?.diamond_sales?.total_sales}
+                percent={(((summaryData?.total_diamond ?? 0) - (summaryData?.diamond_sales?.total_sales ?? 0)) / (summaryData?.total_diamond ?? 1)) * 100}
+                weight={summaryData?.diamond_sales?.total_weight}
+                price={summaryData?.diamond_sales?.total_price}
+                icon="material-symbols:diamond"
+                color={theme.vars.palette.success.main}
+              />
+
+              <OrderAnalytic
+                title="Silver"
+                total={summaryData?.silver_sales?.total_sales}
+                percent={(((summaryData?.total_silver ?? 0) - (summaryData?.silver_sales?.total_sales ?? 0)) / (summaryData?.total_silver ?? 1)) * 100}
+                weight={summaryData?.silver_sales?.total_weight}
+                price={summaryData?.silver_sales?.total_price}
+                icon="mdi:podium-silver"
+                color={theme.vars.palette.warning.main}
+              />
             </Stack>
           </Scrollbar>
         </Card>
+      ) : (
+        ''
       )}
 
       <Card sx={{ mb: { xs: 3, md: 5 } }}>
-        <Accordion defaultExpanded>
-          <AccordionSummary expandIcon={<GridExpandMoreIcon />}>
-            <Typography variant="h6">Category-wise Sales</Typography>
+        <Accordion defaultExpanded={false}>
+          <AccordionSummary
+            expandIcon={<GridExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography variant="h6">Category wise Sales</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Scrollbar>
-              <Grid container spacing={3} padding={2}>
+            <Scrollbar sx={{ minHeight: 500 }}>
+              <Grid container spacing={3} padding={5}>
                 {summaryData?.category_sales?.map((category) => (
                   <Grid item xs={12} sm={6} md={4} key={category.product__category__name}>
                     <Card>
                       <Box sx={{ p: 2 }}>
-                        <Typography variant="subtitle1">
-                          {category.product__category__name}
+                        <Typography variant="subtitle1" gutterBottom>
+                          {category.product__category__name.charAt(0).toUpperCase() + category.product__category__name.slice(1)}
                         </Typography>
-                        <Typography>Total Sold: {category.total_sold}</Typography>
-                        <Typography>Total Price: ₹{category.total_price.toLocaleString()}</Typography>
-                        <Typography>Total Weight: {category.total_weight}g</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Total Sold:</strong> {category.total_sold}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Total Price:</strong> ₹{category.total_price.toLocaleString()}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Total Weight:</strong> {category.total_weight}g
+                        </Typography>
                       </Box>
                     </Card>
                   </Grid>
@@ -162,7 +196,6 @@ export function OrderListView() {
           </AccordionDetails>
         </Accordion>
       </Card>
-
       <Card>
         <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -192,13 +225,27 @@ export function OrderListView() {
                 </MenuItem>
               ))}
             </TextField>
-            <TextField
-              label="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && setPage(0)}
-              sx={{ width: 250 }}
-            />
+            <Stack direction="row" spacing={1} alignItems="center" >
+              <TextField
+                size="big"
+                placeholder="Search..."
+                value={searchTermS}
+                onChange={(e)=>{
+                  setSearchTermS(e.target.value)
+                }}
+                variant="outlined"
+              />
+              <IconButton
+                onClick={()=>{
+                  setSearchTerm(searchTermS)
+                }}
+                color="primary"
+                sx={{ p: '10px' }}
+                aria-label="search"
+              >
+                <Iconify icon="solar:magnifer-broken" />
+              </IconButton>
+            </Stack>
             <Button onClick={handleResetFilters}>Reset Filters</Button>
           </Box>
         </Box>

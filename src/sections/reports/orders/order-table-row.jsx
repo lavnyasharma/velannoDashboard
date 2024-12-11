@@ -13,16 +13,14 @@ import TableCell from '@mui/material/TableCell';
 import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
-
 import { Iconify } from 'src/components/iconify';
 import { useBoolean } from 'src/hooks/use-boolean';
-
 import { fCurrency } from 'src/utils/format-number';
 import { fDate, fTime } from 'src/utils/format-time';
-
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { usePopover, CustomPopover } from 'src/components/custom-popover';
-import { pdf } from '@react-pdf/renderer';
+import { useRouter } from 'src/routes/hooks';
+import { paths } from 'src/routes/paths';
 import { InvoicePDF } from './order-pdf-print';
 
 // ----------------------------------------------------------------------
@@ -30,29 +28,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
   const confirm = useBoolean();
   const collapse = useBoolean();
   const popover = usePopover();
-
-  const handlePrint = async (e, invoice) => {
-    e.stopPropagation()
-
-
-    // Generate PDF blob
-    const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
-    const url = URL.createObjectURL(blob);
-
-    // Create a temporary iframe for printing
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none'; // Hide the iframe
-    document.body.appendChild(iframe);
-
-    // Set the source of the iframe to the PDF blob URL
-    iframe.src = url;
-
-    // Trigger print when the iframe loads the PDF
-    iframe.onload = () => {
-      iframe.contentWindow.print();
-
-
-    };
+  const router = useRouter();
+  const handlePrint = (order_number) => {
+    router.push(paths.dashboard.invoice.details(order_number))
   }
 
   const handleRowClick = () => {
@@ -88,9 +66,12 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
               alignItems: 'flex-start',
             }}
           >
-            <Box component="span">{row.cname ? row.cname : `Anon Customer`}</Box>
+            <Box component="span">{row.cname ? row.cname : row.customer ? row.customer.name : `Anon Customer`}</Box>
             <Box component="span" sx={{ color: 'text.disabled' }}>
-              {row.email ? row.email : ''}
+              {row.email ? row.email : row.customer ? row.customer.email : `No Email`}
+            </Box>
+            <Box component="span" sx={{ color: 'text.disabled', justifyContent: "center", display: "flex" }}>
+              <Iconify icon="mynaui:cake" /> {`-${row.birthday ? row.birthday : row.customer ? fDate(row.customer.birthday) : `-`}`}
             </Box>
           </Stack>
         </Stack>
@@ -109,9 +90,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
         />
       </TableCell>
 
-      <TableCell align="center"> {row.items.length} </TableCell>
-
-      <TableCell> {fCurrency(row.items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
+      <TableCell align="center"> {row.total ? fCurrency(row.total) : "-"} </TableCell>
+      <TableCell align="center"> {row.total_discount || row.franchise_discount_amount ? fCurrency(row.total_discount + row.franchise_discount_amount || row.total_discount || row.franchise_discount_amount) : '-'} </TableCell>
+      <TableCell> {row.final_total ? fCurrency(row.final_total) : fCurrency(row.order_items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
       <TableCell> {row.payment_method ? row.payment_method.toUpperCase() : ''} </TableCell>
 
       {/* Add actions table cell */}
@@ -119,7 +100,7 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
         <Tooltip title="Print">
           <IconButton
             onClick={(e) => {
-              handlePrint(e, row);
+              handlePrint(row.order_number);
             }}
           >
             <Iconify icon="solar:printer-minimalistic-bold" />
@@ -140,7 +121,7 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
           sx={{ bgcolor: 'background.neutral' }}
         >
           <Paper sx={{ m: 1.5 }}>
-            {row.items.map((item) => (
+            {row.order_items.map((item) => (
               <Stack
                 key={item.id}
                 direction="row"
