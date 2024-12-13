@@ -116,9 +116,21 @@ export const navData = [
             children: [
               { title: 'inventory', path: paths.dashboard.reports.root, roles: ['admin', 'counter'] },
               { title: 'orders', path: paths.dashboard.reports.orders, roles: ['admin', 'counter'] },
-             
 
             ],
+            roles: ['admin',"counter"],
+          },
+          
+          {
+            title: 'Dispatch',
+            path: paths.dashboard.dispatch.bulk,
+            icon: ICONS.ecommerce,
+            children: [
+              { title: 'Select', path: paths.dashboard.dispatch.select, roles: ['admin', 'counter'] },
+              { title: 'Bulk', path: paths.dashboard.dispatch.bulk, roles: ['admin', 'counter'] },
+             
+            ],
+           
             roles: ['admin',"counter"],
           },
         

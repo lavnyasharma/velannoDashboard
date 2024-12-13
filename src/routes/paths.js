@@ -132,10 +132,7 @@ export const paths = {
       new: `${ROOTS.DASHBOARD}/invoice/new`,
       details: (id) => `${ROOTS.DASHBOARD}/invoice/${id}`,
       edit: (id) => `${ROOTS.DASHBOARD}/invoice/${id}/edit`,
-      demo: {
-        details: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}`,
-        edit: `${ROOTS.DASHBOARD}/invoice/${MOCK_ID}/edit`,
-      },
+     
     },
    
     order: {
@@ -147,6 +144,10 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/reports/inventory`,
       orders: `${ROOTS.DASHBOARD}/reports/orders`,
      
+    },
+    dispatch:{
+      bulk: `${ROOTS.DASHBOARD}/dispatch/bulk`,
+      select: `${ROOTS.DASHBOARD}/dispatch/select`,
     },
     search: {
       root: `${ROOTS.DASHBOARD}/hsnSearch`,

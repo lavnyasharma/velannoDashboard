@@ -11,6 +11,11 @@ import { AuthGuard } from 'src/auth/guard';
 import { SearchByHsnList } from 'src/sections/billing/view/order-list-view';
 import { OrderReportListView } from 'src/sections/reports/orders/view/order-list-view';
 import { ProductReportListView } from 'src/sections/reports/inventory/view';
+import { BulkSelectView } from 'src/sections/dispatch/bulk/view';
+import TagMultiSelect from 'src/sections/dispatch/selected/searchHsn';
+import BulkEditCard from 'src/sections/dispatch/selected/searchHsn';
+// import Bulkdispatch from 'src/sections/dispatch/bulkdispatch';
+// import Selectdispatch from 'src/sections/dispatch/selectdispatch';
 
 // ----------------------------------------------------------------------
 
@@ -133,6 +138,13 @@ export const dashboardRoutes = [
         children: [
           { path:'inventory',element: <ProductReportListView />, index: true },
           { path:'orders',element: <OrderReportListView />, index: true },
+        ],
+      },
+      {
+        path: 'dispatch',
+        children: [
+          { path: 'select',element: <BulkSelectView/> ,index:true },
+          { path: 'bulk',element: <BulkEditCard /> ,index:true },
         ],
       },
       {
