@@ -15,7 +15,7 @@ import { toast } from 'src/components/snackbar';
 const API_COUNTERS_URL = '/list/counter/';
 const API_BULK_EDIT_URL = '/update/bulk/counter/';
 
-export default function BulkEditCard() {
+export function BulkEditCard() {
   const [counterOptions, setCounterOptions] = useState([]);
   const [selectedCounter, setSelectedCounter] = useState(null);
   const [rangeStart, setRangeStart] = useState('');
@@ -196,7 +196,7 @@ export default function BulkEditCard() {
       </Card>
 
       {/* Sidebar */}
-      <Card sx={{ flex: 1, padding: '10px' }}>
+      <Card sx={{ padding: '10px' }}>
         <Typography variant="h6" gutterBottom>
           Summary
         </Typography>

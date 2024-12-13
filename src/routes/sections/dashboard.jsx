@@ -12,8 +12,7 @@ import { SearchByHsnList } from 'src/sections/billing/view/order-list-view';
 import { OrderReportListView } from 'src/sections/reports/orders/view/order-list-view';
 import { ProductReportListView } from 'src/sections/reports/inventory/view';
 import { BulkSelectView } from 'src/sections/dispatch/bulk/view';
-import TagMultiSelect from 'src/sections/dispatch/selected/searchHsn';
-import BulkEditCard from 'src/sections/dispatch/selected/searchHsn';
+import {BulkEditCard} from 'src/sections/dispatch/selected/searchHsn';
 // import Bulkdispatch from 'src/sections/dispatch/bulkdispatch';
 // import Selectdispatch from 'src/sections/dispatch/selectdispatch';
 
