@@ -55,7 +55,7 @@ export function OrderAnalytic({ title, total, weight, icon, color, percent, pric
 
         <Typography variant="subtitle2">{fCurrency(price)}</Typography>
         <Box component="span" sx={{ color: 'text.disabled', typography: 'body2' }}>
-          {`${weight}g`}
+          {`${(weight.toFixed(2))}g`}
         </Box>
       </Stack>
     </Stack>

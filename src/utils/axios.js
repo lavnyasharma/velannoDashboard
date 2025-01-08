@@ -9,45 +9,32 @@ const axiosInstance = axios.create({ baseURL: CONFIG.serverUrl });
 
 // Response Interceptor
 axiosInstance.interceptors.response.use(
-  (response) => response
-  ,
+  (response) => response,
   (error) => {
     // Handle error response
-    const errorMessage = error.response?.data?.detail || 'Something went wrong!';
+    const errorMessage = error.response?.data?.detail || 'Something went wong!';
     const errorStatus = error.response?.status;
 
     if (errorStatus === 400) {
-      // Handle 400 error (e.g., validation errors)
       toast.error(`${errorMessage}`, {
-        autoClose: 5000,  // Adjust as needed
+        autoClose: 5000,
       });
     } else if (errorStatus === 500) {
-      // Handle 500 error (server error)
       toast.error('Server Error. Please try again later.', {
-      
         autoClose: 5000,
       });
     } else if (errorStatus === 401) {
-      // Handle 500 error (server error)
       toast.error(`${errorMessage}`, {
-      
         autoClose: 5000,
       });
-    }else if (error.response?.status === 0) {
-      // This handles network errors (like no internet connection)
+    } else if (error.response?.status === 0) {
       toast.error('Network Error. Please check your internet connection.', {
-       
-        autoClose: 5000,
-      });
-    } else {
-      // Generic error message for other errors
-      toast.error(errorMessage, {
-       
         autoClose: 5000,
       });
     }
 
-    return Promise.resolve({});
+    // Reject the promise to propagate the error
+    return Promise.reject(error);
   }
 );
 

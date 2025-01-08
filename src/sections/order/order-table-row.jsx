@@ -90,9 +90,9 @@ export function OrderTableRow({ row, selected, onViewRow, onSelectRow, onDeleteR
         />
       </TableCell>
 
-      <TableCell align="center"> {row.total ? fCurrency(row.total) : "-"} </TableCell>
+      <TableCell align="center"> {row.final_total ? fCurrency(row.final_total) : "-"} </TableCell>
       <TableCell align="center"> {row.total_discount || row.franchise_discount_amount ? fCurrency(row.total_discount + row.franchise_discount_amount || row.total_discount || row.franchise_discount_amount) : '-'} </TableCell>
-      <TableCell> {row.final_total ? fCurrency(row.final_total) : fCurrency(row.order_items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
+      <TableCell> {row.total ? fCurrency(row.total) : fCurrency(row.order_items.reduce((acc, item) => acc + item.total, 0))} </TableCell>
       <TableCell> {row.payment_method ? row.payment_method.toUpperCase() : ''} </TableCell>
 
       {/* Add actions table cell */}

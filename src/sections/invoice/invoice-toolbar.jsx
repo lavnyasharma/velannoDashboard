@@ -77,9 +77,8 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
     iframe.onload = () => {
       iframe.contentWindow.print();
 
-      confirm.onTrue();
     };
-  }, [invoice, confirm]);
+  }, [invoice]);
   const renderDownload = (
     <NoSsr>
       <PDFDownloadLink

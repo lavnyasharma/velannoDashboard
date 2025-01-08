@@ -17,7 +17,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { useTable, TableNoData, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
 import { useTheme } from '@emotion/react';
-import { Divider, Stack, Grid, MenuItem, IconButton } from '@mui/material';
+import { Divider, Stack, Grid, MenuItem, CardContent, IconButton } from '@mui/material';
 import { GridExpandMoreIcon } from '@mui/x-data-grid';
 import { Iconify } from 'src/components/iconify';
 import { OrderTableRow } from '../order-table-row';
@@ -35,6 +35,112 @@ const TABLE_HEAD = [
   { id: 'actions', label: 'Actions', width: 140 },
 ];
 
+const SummaryCard = ({ summaryData }) => {
+  const { total_discount, total_roundoff, total_franchise_discount } = summaryData?.total_summary || {};
+
+  return (
+    <Card sx={{ mb: { xs: 3, md: 5 }, p: 2, boxShadow: 3 }}>
+      <CardContent>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold" }}>
+          Summary Overview
+        </Typography>
+        <Grid container spacing={3} direction="row" alignItems="center">
+          {/* Total Discount */}
+          <Grid item xs={12} sm={4} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 2,
+                borderRadius: 2,
+                width: "100%",
+              }}
+            >
+              <Iconify
+                icon="mdi:discount-circle"
+                sx={{
+                  fontSize: 100,
+                  color: "red",
+                  mr: 2,
+                }}
+              />
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontSize:12, fontWeight: "bold" }}>
+                  Total Discount
+                </Typography>
+                <Typography variant="h6" sx={{ color: "red" }}>
+                  ₹{total_discount || 0}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Total Roundoff */}
+          <Grid item xs={12} sm={4} sx={{ fontSize:12, fontWeight: "bold" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 2,
+                borderRadius: 2,
+                width: "100%",
+              }}
+            >
+              <Iconify
+                icon="mdi:adjust"
+                sx={{
+                  fontSize: 40,
+                  color: "#007bff",
+                  mr: 2,
+                }}
+              />
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontSize:12, fontWeight: "bold"}}>
+                  Total Roundoff
+                </Typography>
+                <Typography variant="h6" sx={{ color: "#007bff" }}>
+                  ₹{total_roundoff || 0}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+
+          {/* Total Franchise Discount */}
+          <Grid item xs={12} sm={4} sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 2,
+                borderRadius: 2,
+                width: "100%",
+              }}
+            >
+              <Iconify
+                icon="mdi:store"
+                sx={{
+                  fontSize: 40,
+                  color: "green",
+                  mr: 2,
+                }}
+              />
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontSize:12, fontWeight: "bold" }}>
+                  Franchise Discount
+                </Typography>
+                <Typography variant="h6" sx={{ color: "green" }}>
+                  ₹{total_franchise_discount || 0}
+                </Typography>
+              </Box>
+            </Box>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+};
+
+
 export function OrderListView() {
   const [listData, setListData] = useState([]);
   const [summaryData, setSummaryData] = useState({});
@@ -51,6 +157,7 @@ export function OrderListView() {
 
   const getListData = useCallback(async () => {
     setLoading(true);
+    setListData([]);
     try {
       const params = {
         limit: rowsPerPage,
@@ -60,13 +167,12 @@ export function OrderListView() {
         search: searchTerm || undefined,
       };
 
-      const { data } = await axiosInstance.get('/order-lists/', { params });
+      const { data } = await axiosInstance.get('/order-lists/', { params }).finally(() => setLoading(false));
       setListData(data.results);
       setTotalRows(data.count);
     } catch (error) {
       toast.error('Error fetching orders');
     }
-    setLoading(false);
   }, [rowsPerPage, page, month, year, searchTerm]);
 
   const getSummaryData = useCallback(async () => {
@@ -98,8 +204,8 @@ export function OrderListView() {
   };
 
   const handleResetFilters = () => {
-    setMonth(new Date().getMonth() + 1);
-    setYear(new Date().getFullYear());
+    setMonth("");
+    setYear("");
     setSearchTerm('');
     setPage(0);
   };
@@ -125,10 +231,10 @@ export function OrderListView() {
             >
               <OrderAnalytic
                 title="Total"
-                total={summaryData?.total_sales_summary?.total_quantity}
-                percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_sales_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
-                weight={summaryData?.total_sales_summary?.total_weight}
-                price={summaryData?.total_sales_summary?.total_price}
+                total={summaryData?.total_orders}
+                percent={(((summaryData?.total_products ?? 0) - (summaryData?.total_summary?.total_quantity ?? 0)) / (summaryData?.total_products ?? 1)) * 100}
+                weight={(summaryData?.diamond_sales?.total_weight ?? 0) + (summaryData?.silver_sales?.total_weight ?? 0)}
+                price={summaryData?.total_summary?.total_price}
                 icon="solar:bill-list-bold-duotone"
                 color={theme.vars.palette.info.main}
               />
@@ -158,6 +264,8 @@ export function OrderListView() {
       ) : (
         ''
       )}
+
+      <SummaryCard summaryData={summaryData} />
 
       <Card sx={{ mb: { xs: 3, md: 5 } }}>
         <Accordion defaultExpanded={false}>
@@ -219,7 +327,7 @@ export function OrderListView() {
               onChange={(e) => setYear(Number(e.target.value))}
               sx={{ width: 150 }}
             >
-              {[...Array(5)].map((_, i) => (
+              {[...Array(2)].map((_, i) => (
                 <MenuItem key={i} value={new Date().getFullYear() - i}>
                   {new Date().getFullYear() - i}
                 </MenuItem>
@@ -230,13 +338,13 @@ export function OrderListView() {
                 size="big"
                 placeholder="Search..."
                 value={searchTermS}
-                onChange={(e)=>{
+                onChange={(e) => {
                   setSearchTermS(e.target.value)
                 }}
                 variant="outlined"
               />
               <IconButton
-                onClick={()=>{
+                onClick={() => {
                   setSearchTerm(searchTermS)
                 }}
                 color="primary"
@@ -250,7 +358,7 @@ export function OrderListView() {
           </Box>
         </Box>
         <Scrollbar>
-          <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+          <Table size='small' sx={{ minWidth: 1050 }}>
             <TableHeadCustom headLabel={TABLE_HEAD} />
             <TableBody>
               {loading ? (

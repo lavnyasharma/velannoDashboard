@@ -10,7 +10,7 @@ import {
   GridActionsCellItem,
   GridExpandMoreIcon,
 } from '@mui/x-data-grid';
-
+import CircularProgress from '@mui/material/CircularProgress';
 import { paths } from 'src/routes/paths';
 import { useRouter } from 'src/routes/hooks';
 import { RouterLink } from 'src/routes/components';
@@ -220,7 +220,7 @@ export function ProductListView() {
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
-        {Object.keys(summaryData).length !== 0 ? (
+        {!loading ? Object.keys(summaryData).length !== 0 ? (
           <Card sx={{ mb: { xs: 3, md: 5 } }}>
             <Scrollbar sx={{ minHeight: 108 }}>
               <Stack
@@ -270,10 +270,14 @@ export function ProductListView() {
             </Scrollbar>
           </Card>
         ) : (
-          ""
-        )}
+          <Stack direction="row" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
+            <CircularProgress />
+          </Stack>
+        ) : <Stack direction="row" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
+          <CircularProgress />
+        </Stack>}
 
-        <Card sx={{ mb: { xs: 3, md: 5 } }}>
+        {!loading ? <Card sx={{ mb: { xs: 3, md: 5 } }}>
           <Accordion defaultExpanded={false}>
             <AccordionSummary
               expandIcon={<GridExpandMoreIcon />}
@@ -295,7 +299,9 @@ export function ProductListView() {
               </Scrollbar>
             </AccordionDetails>
           </Accordion>
-        </Card>
+        </Card> : <Stack direction="row" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
+          <CircularProgress />
+        </Stack>}
         <Select
 
           value={filterQuantity}

@@ -46,7 +46,6 @@ export function OrderTableRow({
   const collapse = useBoolean();
   const popover = usePopover();
 
-
   const handleDiscountClick = () => {
     DiscountModal.onTrue(); // Open the modal
   };
@@ -137,7 +136,7 @@ export function OrderTableRow({
                   toast.success(`item ${row.hsn} added to cart`);
                 })
                 .catch((error) => {
-                  toast.error(error.detail);
+                  toast.error(error.response?.data?.detail);
                 });
             }}
             sx={{ ...(collapse.value && { bgcolor: 'action.hover' }) }}
@@ -286,6 +285,8 @@ export function OrderTableRow({
           </Button>
         }
       />
+
+      
       <DiscountModalComponent onDiscountUpdate={onDataUpdate} cartItemId={row.id} itemDiscount={row.discount ? row.discount.id : null} is_diamond={row.is_diamond} modalTitle={modalTitle} open={DiscountModal.value} handleCloseDiscountModal={handleCloseDiscountModal} />
 
     </>

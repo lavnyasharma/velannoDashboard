@@ -126,12 +126,12 @@ export const navData = [
             path: paths.dashboard.dispatch.bulk,
             icon: ICONS.ecommerce,
             children: [
-              { title: 'Select', path: paths.dashboard.dispatch.select, roles: ['admin', 'counter'] },
-              { title: 'Bulk', path: paths.dashboard.dispatch.bulk, roles: ['admin', 'counter'] },
+              { title: 'Select', path: paths.dashboard.dispatch.select, roles: ['admin'] },
+              { title: 'Bulk', path: paths.dashboard.dispatch.bulk, roles: ['admin',] },
              
             ],
            
-            roles: ['admin',"counter"],
+            roles: ['admin'],
           },
         
       

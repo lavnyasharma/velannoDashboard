@@ -51,7 +51,7 @@ export function ProductsAnalytic({ title, total,ltotal, weight,lweight, icon, co
         <Typography variant="subtitle1">{title}</Typography>
 
         <Box component="span" sx={{ color: 'text.disabled', typography: 'body2' }}>
-          {fShortenNumber(ltotal)}/{fShortenNumber(total)}
+          {(ltotal)}/{(total)}
         </Box>
 
 

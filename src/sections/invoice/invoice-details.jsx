@@ -38,7 +38,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export function InvoiceDetails({ invoice }) {
   const [currentStatus, setCurrentStatus] = useState(invoice?.status);
-
+  console.log(invoice)
   const handleChangeStatus = useCallback((event) => {
     setCurrentStatus(event.target.value);
   }, []);
@@ -70,14 +70,20 @@ export function InvoiceDetails({ invoice }) {
         </StyledTableRow>
       )}
 
-      <StyledTableRow>
+      {invoice.franchise_discount_amount > 0 && <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>Franchise Discount</TableCell>
         <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
           {`-${fCurrency(invoice.franchise_discount_amount)}`}
         </TableCell>
-      </StyledTableRow>
-
+      </StyledTableRow>}
+      {invoice.roundoff > 0 && <StyledTableRow>
+        <TableCell colSpan={3} />
+        <TableCell sx={{ color: 'text.secondary' }}>Round off</TableCell>
+        <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
+          {`-${fCurrency(invoice.roundoff)}`}
+        </TableCell>
+      </StyledTableRow>}
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Final Total</TableCell>
@@ -135,18 +141,13 @@ export function InvoiceDetails({ invoice }) {
               <TableCell>{item.quantity}</TableCell>
               <TableCell align="right">{fCurrency(item.product.price)}</TableCell>
               <TableCell align="right">
-                {item.product.is_gold
-                  ? invoice.diamond_discount
-                  : invoice.silver_discount}
+                {item.discount !== null ? `${item.discount?.percentage}%` : "0%"}
               </TableCell>
               <TableCell align="right">
                 {fCurrency(
-                  item.total -
-                    item.total * cDiscount(
-                      item.product.is_gold
-                        ? invoice.diamond_discount
-                        : invoice.silver_discount
-                    )
+                  (item.discount !== null
+                    ? item.total - item.total * (item.discount.percentage / 100)
+                    : item.total)
                 )}
               </TableCell>
             </TableRow>
@@ -201,11 +202,11 @@ export function InvoiceDetails({ invoice }) {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               Estimate to
             </Typography>
-            {invoice.customer?invoice.customer.name:invoice.cname}
+            {invoice.customer ? invoice.customer.name : invoice.cname}
             <br />
-            {invoice.customer?invoice.customer.email:invoice.email}
+            {invoice.customer ? invoice.customer.email : invoice.email}
             <br />
-            Phone: {invoice.customer?invoice.customer.phone:invoice.phone}
+            Phone: {invoice.customer ? invoice.customer.phone : invoice.phone}
             <br />
           </Stack>
 

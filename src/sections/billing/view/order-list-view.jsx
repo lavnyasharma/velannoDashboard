@@ -5,7 +5,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { Scrollbar } from 'src/components/scrollbar';
-import { Table, TableBody, TableRow, TableCell, Select, FormControl, InputLabel, MenuItem, TableHead, InputAdornment, Chip } from '@mui/material';
+import { Table, TableBody, TableRow, TableCell, Select, FormControl, InputLabel, MenuItem, TableHead, InputAdornment, Chip, CircularProgress } from '@mui/material';
 import { TableHeadCustom } from 'src/components/table';
 import { toast } from 'src/components/snackbar';
 import axiosInstance from 'src/utils/axios';
@@ -16,6 +16,8 @@ import { Iconify } from 'src/components/iconify';
 import Modal from '@mui/material/Modal';
 import { useBoolean } from 'src/hooks/use-boolean';
 import { capitalizeFirstLetter, formatIndianCurrency } from 'src/utils/helper';
+import { ConfirmDialog } from 'src/components/custom-dialog';
+
 import { OrderTableRow } from '../order-table-row'; // Adjust if necessary
 import AddCustomerModal from '../order-coustomer-details-modal';
 import CouponCodeComponent from '../order-coupon-code';
@@ -71,6 +73,7 @@ export function SearchByHsnList() {
   };
 
 
+  const [orderConfirmLoading, setOrderConfirmLoading] = useState(false);
 
   const router = useRouter();
   const [tableData, setTableData] = useState({});
@@ -90,7 +93,7 @@ export function SearchByHsnList() {
   const [paymentMethod, setPaymentMethod] = useState('')
   const [userData, setUserData] = useState({ name: '', email: '', phone: '', fDiscount: '', silverDiscount: '0', diamondDiscount: '0', paymentMethod: '' });
   const collapse = useBoolean();
-
+  const confirm = useBoolean();
   const [salesPersons, setSalesPersons] = useState([]);  // State to store sales person data
   const [selectedSalesPerson, setSelectedSalesPerson] = useState('');  // State to store selected salesperson id
 
@@ -216,38 +219,28 @@ export function SearchByHsnList() {
 
   const handleSearchByHsn = async () => {
     try {
-      const response = await axiosInstance.get(`/product/${hsnInput}/details`).then((res) => {
-        const data = res.data
-        setTableData(data);
-        toast.success('Product details fetched successfully!');
-      }).catch((error) => {
-        toast.error(`Failed! ${error}`);
-      })
+      const response = await axiosInstance.get(`/product/${hsnInput}/details`);
+      const data = response.data;
+      console.log(response);
+      setTableData(data);
+      toast.success('Product details fetched successfully!');
     } catch (error) {
-      toast.error('Error fetching product details');
+      if (error.response?.status === 404) {
+        toast.error('Product not found!');
+      }
     }
   };
 
   const handleConfirmOrder = async () => {
-    // const savedData = JSON.parse(localStorage.getItem('userData'));
-    // if (localStorage.getItem('userData') && Object.keys(JSON.parse(localStorage.getItem('userData'))).length === 3) {
-    //   localStorage.removeItem('userData')
-    //   return
-    // }
-    // if (savedData) {
-    //   setUserData(savedData); // Pre-fill modal fields if data exists
-    // }
-    // setOpenModal(true); // Open the modal on Confirm Order click
+    setOrderConfirmLoading(true); // Set loading to true
     try {
-      const response = await axiosInstance.post(`/confirm/order/`).then((res) => {
-        console.log(res.data.order_number)
-        router.push(paths.dashboard.invoice.details(res.data.order_number))
-        toast.success('Order confirmed successfully!');
-      }).catch((error) => {
-        toast.error(`Failed! ${error}`);
-      })
+      const response = await axiosInstance.post(`/confirm/order/`);
+      router.push(paths.dashboard.invoice.details(response.data.order_number));
+      toast.success('Order confirmed successfully!');
     } catch (error) {
-      toast.error('Error confirming order');
+      toast.error(`Failed! ${error.response?.data?.message || 'Error confirming order'}`);
+    } finally {
+      setOrderConfirmLoading(false); // Reset loading to false
     }
   };
 
@@ -262,7 +255,7 @@ export function SearchByHsnList() {
       // Send the put request to update the cart franchise discount
       await axiosInstance.put(`cart/update/`,
         {
-          franchise_discount: Number(franchiseDiscount) > 0 && ((franchiseDiscount < 15 && franchiseDiscountType === 'percentage')||franchiseDiscountType === 'fixed' ) ? franchiseDiscount : 0,
+          franchise_discount: Number(franchiseDiscount) > 0 && ((franchiseDiscount < 15 && franchiseDiscountType === 'percentage') || franchiseDiscountType === 'fixed') ? franchiseDiscount : 0,
           franchise_discount_type: franchiseDiscountType
         });
       if (onDataUpdate) {
@@ -325,6 +318,11 @@ export function SearchByHsnList() {
   return (
     <>
       <DashboardContent sx={{ flexDirection: "row", flexGrow: 1, justifyContent: "space-around", }}>
+        {orderConfirmLoading && <div style={{ position: 'fixed', backgroundColor: 'rgba(0, 0, 0, 0.5)', width: '100%', height: '100%', top: 0, left: 0, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <h1>Processing Order...</h1>
+          <CircularProgress />
+        </div>}
+
         <div style={{ width: "55%" }}> <Card>
           <Box sx={{ p: 2 }}>
             <TextField
@@ -344,7 +342,7 @@ export function SearchByHsnList() {
             <Table>
               <TableHeadCustom headLabel={TABLE_HEAD} />
               <TableBody>
-                {Object.keys(tableData).length > 0 ? (
+                {tableData && Object.keys(tableData).length > 0 ? (
                   <OrderTableRow
                     key={tableData.uuid || tableData.hsn}
                     onAdd={getCartData}
@@ -375,7 +373,9 @@ export function SearchByHsnList() {
           <Card>
             <Box sx={{ p: 2 }} width="100%" display="flex" justifyContent="space-between">
               <span>Current Cart</span>
-              <Button color="success" disabled={cart.length === 0} onClick={handleConfirmOrder}>
+              <Button color="success" disabled={cart.length === 0} onClick={() => {
+                confirm.onTrue();
+              }}>
                 Confirm Order
               </Button>
             </Box>
@@ -583,7 +583,7 @@ export function SearchByHsnList() {
                   </TableRow>
 
                   {/* Apply Coupon row */}
-                  <CouponCodeComponent disable={totalDiscount>0} couponData={couponCodeDiscount > 0 ? couponCode : null} onDataUpdate={onDataUpdate} />
+                  <CouponCodeComponent disable={totalDiscount > 0} couponData={couponCodeDiscount > 0 ? couponCode : null} onDataUpdate={onDataUpdate} />
 
                   {/* Payment Method and Details */}
                   <TableRow>
@@ -722,6 +722,27 @@ export function SearchByHsnList() {
           </Box>
         </Box>
       </Modal >
+
+      <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        title="Close Order"
+        content="Done With Billing? Close Order?"
+        action={
+          <Button
+            variant="contained"
+            color="error"
+            onClick={async () => {
+              if (!orderConfirmLoading) {
+                await handleConfirmOrder();
+              }
+            }}
+            disabled={orderConfirmLoading} // Disable button while loading
+          >
+            {orderConfirmLoading ? 'Processing...' : 'Close Order'}
+          </Button>
+        }
+      />
       <AddCustomerModal customerData={customerData} setCustomerData={setCustomerData} open={collapse.value} onClose={() => {
         collapse.onFalse()
       }} />
