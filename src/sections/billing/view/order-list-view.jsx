@@ -461,9 +461,15 @@ export function SearchByHsnList() {
 
                     {/* Render Total Price */}
                     <TableRow>
+                      <TableCell colSpan={3} align="left" style={{ fontWeight: 'bold' }}>GST</TableCell>
+                      <TableCell align="right" style={{ fontWeight: 'bold' }}>
+                        {formatIndianCurrency(subtotal*0.03)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
                       <TableCell colSpan={3} align="left" style={{ fontWeight: 'bold' }}>Subtotal</TableCell>
                       <TableCell align="right" style={{ fontWeight: 'bold' }}>
-                        {formatIndianCurrency(subtotal)}
+                        {formatIndianCurrency(subtotal+subtotal*0.03)}
                       </TableCell>
                     </TableRow>
                   </TableBody>

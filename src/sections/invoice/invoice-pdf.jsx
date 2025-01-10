@@ -83,6 +83,8 @@ export function InvoicePDF({ invoice }) {
     cname, email, phone,
     franchise_discount_amount,
     order_items,
+    total_discount,
+    roundoff,
   } = invoice;
 
   const styles = useStyles();
@@ -192,12 +194,14 @@ export function InvoicePDF({ invoice }) {
           ))}
 
           {[
-            { name: 'Subtotal', value: fCurrency(subtotal) },
-            { name: 'Franchise Discount', value: `-${fCurrency(franchise_discount_amount)}` },
-            { name: 'Additional Discount', value: f_discount },
-            { name: 'Total', value: fCurrency(final_total), styles: styles.h4 },
+            { name: 'Subtotal', value: fCurrency(subtotal), raw: subtotal },
+            { name: 'Franchise Discount', value: `-${fCurrency(franchise_discount_amount)}`, raw: franchise_discount_amount },
+            { name: 'Discount', value: total_discount, raw: total_discount },
+            { name: 'Roundoff', value: fCurrency(roundoff), raw: roundoff },
+            { name: 'GST', value: `${fCurrency(final_total * 0.03)}(3%)`, raw: final_total*0.03 },
+            { name: 'Total', value: fCurrency(final_total + final_total * 0.03), styles: styles.h4, raw: final_total },
           ].map((item) => (
-            <View key={item.name} style={[styles.row, styles.noBorder]}>
+            item.raw !== 0 && <View key={item.name} style={[styles.row, styles.noBorder]}>
               <View style={styles.cell_1} />
               <View style={styles.cell_2} />
               <View style={styles.cell_3} />
