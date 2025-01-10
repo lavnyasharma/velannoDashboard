@@ -17,7 +17,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { useTable, TableNoData, TableHeadCustom, TablePaginationCustom } from 'src/components/table';
 import { useTheme } from '@emotion/react';
-import { Divider, Stack, Grid, MenuItem, IconButton } from '@mui/material';
+import { Divider, Stack, Grid, MenuItem, IconButton, CircularProgress } from '@mui/material';
 import { Iconify } from 'src/components/iconify';
 import { CSVLink } from 'react-csv'; // Import CSVLink
 import { OrderTableRow } from '../order-table-row';
@@ -37,9 +37,10 @@ const TABLE_HEAD = [
 export function OrderReportListView() {
   const [listData, setListData] = useState([]);
   const [csvData, setCsvData] = useState([]); // Data for CSV export
-  const [summaryData, setSummaryData] = useState({});
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [Genrateloading, setGenrateLoading] = useState(false);
+  const [selectedCounter, setSelectedCounter] = useState(0);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,6 +53,7 @@ export function OrderReportListView() {
 
   const getListData = useCallback(async () => {
     setLoading(true);
+    setListData([]);
     try {
       const params = {
         limit: rowsPerPage,
@@ -70,19 +72,9 @@ export function OrderReportListView() {
     setLoading(false);
   }, [rowsPerPage, page, month, year, searchTerm]);
 
-  const getSummaryData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = { month, year };
-      const { data } = await axiosInstance.get('/order/summary/seller/', { params });
-      setSummaryData(data);
-    } catch (error) {
-      toast.error('Error fetching summary data');
-    }
-    setLoading(false);
-  }, [month, year]);
 
   const exportToCsv = useCallback(async () => {
+    setGenrateLoading(true);
     try {
       const params = {
         limit: 10000, // Request up to 10,000 rows
@@ -106,6 +98,7 @@ export function OrderReportListView() {
       ]);
 
       setCsvData([headers, ...rows]);
+      setGenrateLoading(false);
       toast.success('Data ready for export!');
     } catch (error) {
       toast.error('Error exporting data');
@@ -114,8 +107,7 @@ export function OrderReportListView() {
 
   useEffect(() => {
     getListData();
-    getSummaryData();
-  }, [getListData, getSummaryData]);
+  }, [getListData]);
 
   const handlePageChange = (event, newPage) => {
     setListData([]);
@@ -129,8 +121,9 @@ export function OrderReportListView() {
   };
 
   const handleResetFilters = () => {
-    setMonth(new Date().getMonth() + 1);
-    setYear(new Date().getFullYear());
+    setCsvData([]);
+    setMonth("");
+    setYear("");
     setSearchTerm('');
     setPage(0);
     setSearchTermS('');
@@ -197,9 +190,9 @@ export function OrderReportListView() {
             <Button onClick={handleResetFilters}>Reset Filters</Button>
           </Box>
           <Box>
-            <Button variant="contained" onClick={exportToCsv} sx={{ mr: 2 }}>
-              Generate CSV
-            </Button>
+            {csvData.length === 0 && <Button variant="contained" disabled={Genrateloading} onClick={exportToCsv} sx={{ mr: 2 }}>
+              {Genrateloading ? <><CircularProgress size="1.5rem" />{" Generating.."}.</> : "Generate CSV"}
+            </Button>}
             {csvData.length > 0 && (
               <CSVLink
                 data={csvData}

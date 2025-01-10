@@ -58,17 +58,6 @@ export function InvoiceDetails({ invoice }) {
         </TableCell>
       </StyledTableRow>
 
-      {invoice.f_discount !== "0%" && (
-        <StyledTableRow>
-          <TableCell colSpan={3} />
-          <TableCell sx={{ color: 'text.secondary' }}>Additional</TableCell>
-          <TableCell width={120} sx={{ color: 'error.main', typography: 'body2' }}>
-            {invoice.f_discount.includes("%")
-              ? `-${invoice.f_discount}`
-              : `-${fCurrency(cDiscount(invoice.f_discount))}`}
-          </TableCell>
-        </StyledTableRow>
-      )}
 
       {invoice.franchise_discount_amount > 0 && <StyledTableRow>
         <TableCell colSpan={3} />
@@ -86,9 +75,16 @@ export function InvoiceDetails({ invoice }) {
       </StyledTableRow>}
       <StyledTableRow>
         <TableCell colSpan={3} />
+        <TableCell sx={{ color: 'text.secondary' }}>GST(3%)</TableCell>
+        <TableCell width={120} sx={{ typography: 'body2' }}>
+          {`${fCurrency(invoice.final_total * 0.03)}`}
+        </TableCell>
+      </StyledTableRow>
+      <StyledTableRow>
+        <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Final Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {fCurrency(invoice.final_total)}
+          {fCurrency(invoice.final_total + invoice.final_total * 0.03)}
         </TableCell>
       </StyledTableRow>
     </>

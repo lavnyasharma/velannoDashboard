@@ -12,7 +12,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useTheme } from '@emotion/react';
 import { Autocomplete, IconButton, TextField } from '@mui/material';
-import { RenderCellMaterialProduct, RenderCellProduct } from '../product-table-row';
+import { RenderCellMaterialProduct, RenderCellPrice, RenderCellProduct } from '../product-table-row';
 
 const API_URL = '/list-product/user/';
 const API_COUNTERS_URL = '/list/counter/';
@@ -28,6 +28,8 @@ export function BulkSelectView() {
     pageSize: 10,
   });
   const [totalProducts, setTotalProducts] = useState(0);
+  const [hsnSearchvalue, setHsnSearchvalue] = useState('');
+
   const [hsnSearch, setHsnSearch] = useState('');
   const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]);
   const router = useRouter();
@@ -119,6 +121,7 @@ export function BulkSelectView() {
   );
 
   const handleSearch = () => {
+    setHsnSearch(hsnSearchvalue);
     fetchData();
   };
 
@@ -139,6 +142,9 @@ export function BulkSelectView() {
       headerName: 'Price',
       width: 120,
       sortComparator: (v1, v2) => v1 - v2,
+      renderCell: (params) => (
+        <RenderCellPrice params={params} />
+      ),
     },
     {
       field: 'counter',
@@ -162,8 +168,8 @@ export function BulkSelectView() {
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
         <TextField
           label="Search HSN"
-          value={hsnSearch}
-          onChange={(e) => setHsnSearch(e.target.value)}
+          value={hsnSearchvalue}
+          onChange={(e) => setHsnSearchvalue(e.target.value)}
           variant="outlined"
           sx={{ width: 200 }}
         />
@@ -181,6 +187,7 @@ export function BulkSelectView() {
           pageSize={paginationModel.pageSize}
           rowCount={totalProducts}
           paginationMode="server"
+          onPageChange={(newPage) => setPaginationModel((prev) => ({ ...prev, page: newPage }))}
           onPaginationModelChange={setPaginationModel}
           sortModel={sortModel}
           onSortModelChange={setSortModel}

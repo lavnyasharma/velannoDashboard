@@ -16,14 +16,14 @@ const API_COUNTERS_URL = '/list/counter/';
 const API_BULK_EDIT_URL = '/update/bulk/counter/';
 
 export function BulkEditCard() {
-  const [counterOptions, setCounterOptions] = useState([]);
+  
   const [selectedCounter, setSelectedCounter] = useState(null);
   const [rangeStart, setRangeStart] = useState('');
   const [rangeEnd, setRangeEnd] = useState('');
   const [hsnList, setHsnList] = useState('');
   const [hsnCount, setHsnCount] = useState(0);
   const [loading, setLoading] = useState(false);
-
+  const [counterOptions, setCounterOptions] = useState([]);
   useEffect(() => {
     const fetchCounters = async () => {
       try {

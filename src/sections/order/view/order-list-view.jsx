@@ -23,6 +23,8 @@ import { Iconify } from 'src/components/iconify';
 import { OrderTableRow } from '../order-table-row';
 import { OrderAnalytic } from '../order-analytics';
 
+
+const API_COUNTERS_URL = '/list/counter/';
 const TABLE_HEAD = [
   { id: 'orderNumber', label: 'Select', width: 88 },
   { id: 'orderNumber', label: 'Order', width: 88 },
@@ -65,7 +67,7 @@ const SummaryCard = ({ summaryData }) => {
                 }}
               />
               <Box>
-                <Typography variant="subtitle1" sx={{ fontSize:12, fontWeight: "bold" }}>
+                <Typography variant="subtitle1" sx={{ fontSize: 12, fontWeight: "bold" }}>
                   Total Discount
                 </Typography>
                 <Typography variant="h6" sx={{ color: "red" }}>
@@ -76,7 +78,7 @@ const SummaryCard = ({ summaryData }) => {
           </Grid>
 
           {/* Total Roundoff */}
-          <Grid item xs={12} sm={4} sx={{ fontSize:12, fontWeight: "bold" }}>
+          <Grid item xs={12} sm={4} sx={{ fontSize: 12, fontWeight: "bold" }}>
             <Box
               sx={{
                 display: "flex",
@@ -95,7 +97,7 @@ const SummaryCard = ({ summaryData }) => {
                 }}
               />
               <Box>
-                <Typography variant="subtitle1" sx={{ fontSize:12, fontWeight: "bold"}}>
+                <Typography variant="subtitle1" sx={{ fontSize: 12, fontWeight: "bold" }}>
                   Total Roundoff
                 </Typography>
                 <Typography variant="h6" sx={{ color: "#007bff" }}>
@@ -125,7 +127,7 @@ const SummaryCard = ({ summaryData }) => {
                 }}
               />
               <Box>
-                <Typography variant="subtitle1" sx={{ fontSize:12, fontWeight: "bold" }}>
+                <Typography variant="subtitle1" sx={{ fontSize: 12, fontWeight: "bold" }}>
                   Franchise Discount
                 </Typography>
                 <Typography variant="h6" sx={{ color: "green" }}>
@@ -146,17 +148,21 @@ export function OrderListView() {
   const [summaryData, setSummaryData] = useState({});
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [listloading, setListLoading] = useState(true);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchTermS, setSearchTermS] = useState('');
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [selectedcounter, setSelectedcounter] = useState(0);
+
   const theme = useTheme();
   const table = useTable({ defaultOrderBy: 'hsn', defaultRowsPerPage: rowsPerPage });
 
   const getListData = useCallback(async () => {
-    setLoading(true);
+    setListLoading(true);
     setListData([]);
     try {
       const params = {
@@ -165,27 +171,28 @@ export function OrderListView() {
         month,
         year,
         search: searchTerm || undefined,
+        seller_id: selectedcounter
       };
 
-      const { data } = await axiosInstance.get('/order-lists/', { params }).finally(() => setLoading(false));
+      const { data } = await axiosInstance.get('/order-lists/', { params }).finally(() => setListLoading(false));
       setListData(data.results);
       setTotalRows(data.count);
     } catch (error) {
       toast.error('Error fetching orders');
     }
-  }, [rowsPerPage, page, month, year, searchTerm]);
+  }, [rowsPerPage, page, month, year, searchTerm, selectedcounter]);
 
   const getSummaryData = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { month, year };
+      const params = { month, year, seller_id: selectedcounter };
       const { data } = await axiosInstance.get('/order/summary/seller/', { params });
       setSummaryData(data);
     } catch (error) {
       toast.error('Error fetching summary data');
     }
     setLoading(false);
-  }, [month, year]);
+  }, [month, year, selectedcounter]);
 
   useEffect(() => {
     getListData();
@@ -203,8 +210,29 @@ export function OrderListView() {
     setPage(0);
   };
 
+  const [counterOptions, setCounterOptions] = useState([]);
+  useEffect(() => {
+    if(localStorage.getItem('role') !== 'admin') return;
+    const fetchCounters = async () => {
+      try {
+        const response = await axiosInstance.get(API_COUNTERS_URL);
+        const counters = response.data.map((counter) => ({
+          label: counter.user.username,
+          id: counter.user.id,
+        }));
+        setCounterOptions(counters);
+      } catch (error) {
+        console.error('Error fetching counters:', error);
+      }
+    };
+
+    fetchCounters();
+  }, []);
+
+
   const handleResetFilters = () => {
     setMonth("");
+    setListData([]);
     setYear("");
     setSearchTerm('');
     setPage(0);
@@ -333,6 +361,23 @@ export function OrderListView() {
                 </MenuItem>
               ))}
             </TextField>
+            {localStorage.getItem('role') === 'admin' &&
+              <TextField
+                select
+                label="Counter"
+                value={selectedcounter}
+                onChange={(e) => setSelectedcounter(Number(e.target.value))}
+                sx={{ width: 150 }}
+              >
+                <MenuItem value={0}>
+                  All
+                </MenuItem>
+                {counterOptions && counterOptions.map((item, i) => (
+                  <MenuItem key={i} value={item.id}>
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </TextField>}
             <Stack direction="row" spacing={1} alignItems="center" >
               <TextField
                 size="big"
@@ -361,7 +406,7 @@ export function OrderListView() {
           <Table size='small' sx={{ minWidth: 1050 }}>
             <TableHeadCustom headLabel={TABLE_HEAD} />
             <TableBody>
-              {loading ? (
+              {listloading ? (
                 <TableNoData colSpan={TABLE_HEAD.length} />
               ) : (
                 listData.map((row) => <OrderTableRow key={row.id} row={row} />)
