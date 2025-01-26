@@ -12,6 +12,10 @@ import { SearchByHsnList } from 'src/sections/billing/view/order-list-view';
 import { OrderReportListView } from 'src/sections/reports/orders/view/order-list-view';
 import { ProductReportListView } from 'src/sections/reports/inventory/view';
 import { BulkSelectView } from 'src/sections/dispatch/bulk/view';
+import { SearchAddCustomerView } from 'src/sections/kitty/add';
+import { CustomerListView } from 'src/sections/kitty/list';
+import { CustomerKittyDetailView } from 'src/sections/kitty/details';
+
 import {BulkEditCard} from 'src/sections/dispatch/selected/searchHsn';
 // import Bulkdispatch from 'src/sections/dispatch/bulkdispatch';
 // import Selectdispatch from 'src/sections/dispatch/selectdispatch';
@@ -144,6 +148,15 @@ export const dashboardRoutes = [
         children: [
           { path: 'select',element: <BulkSelectView/> ,index:true },
           { path: 'bulk',element: <BulkEditCard /> ,index:true },
+        ],
+      },
+      {
+        path: 'kitty',
+        children: [
+          { path: 'list',element: <CustomerListView/> ,index:true },
+          { path: 'add',element: <SearchAddCustomerView /> ,index:true },
+          { path: ':id',element: <CustomerKittyDetailView /> ,index:true },
+          
         ],
       },
       {

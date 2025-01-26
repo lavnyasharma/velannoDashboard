@@ -74,10 +74,11 @@ export function InvoicePDF({ invoice }) {
   const {
     order_number,
     customer,
-    createDate,
+    created,
     subtotal,
     final_total,
     diamond_discount,
+    total,
     silver_discount,
     f_discount,
     cname, email, phone,
@@ -100,7 +101,6 @@ export function InvoicePDF({ invoice }) {
       <View style={{ width: '75%' }}>
         <Text style={styles.subtitle2}>NOTES</Text>
         <Text>We appreciate your business.</Text>
-        <Text>This is not an official bill.</Text>
       </View>
       <View style={{ width: '25%', textAlign: 'right' }}>
         <Text style={styles.subtitle2}>Have a question?</Text>
@@ -112,13 +112,13 @@ export function InvoicePDF({ invoice }) {
   const renderInfo = (
     <View style={[styles.container]}>
       <View style={{ width: '50%' }}>
-        <Text style={[styles.subtitle2, styles.mb4]}>Estimate from</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>Invoice from</Text>
         <Text style={styles.body2}>Velonna.co</Text>
         <Text style={styles.body2}>info@velonna.co</Text>
       </View>
 
       <View style={{ width: '50%' }}>
-        <Text style={[styles.subtitle2, styles.mb4]}>Estimate to</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>Invoice to</Text>
         <Text style={styles.body2}>{customer ? customer.name : cname}</Text>
         <Text style={styles.body2}>{customer ? customer.phone : phone}</Text>
         <Text style={styles.body2}>{customer ? customer.email : email}</Text>
@@ -130,7 +130,7 @@ export function InvoicePDF({ invoice }) {
     <View style={[styles.container, styles.mb40]}>
       <View style={{ width: '50%' }}>
         <Text style={[styles.subtitle2, styles.mb4]}>Date created</Text>
-        <Text style={styles.body2}>{fDate(createDate)}</Text>
+        <Text style={styles.body2}>{fDate(created)}</Text>
       </View>
     </View>
   );
@@ -194,10 +194,8 @@ export function InvoicePDF({ invoice }) {
           ))}
 
           {[
-            { name: 'Subtotal', value: fCurrency(subtotal), raw: subtotal },
-            { name: 'Franchise Discount', value: `-${fCurrency(franchise_discount_amount)}`, raw: franchise_discount_amount },
-            { name: 'Discount', value: total_discount, raw: total_discount },
-            { name: 'Roundoff', value: fCurrency(roundoff), raw: roundoff },
+            { name: 'Subtotal', value: fCurrency(total), raw: total },
+            { name: 'Discount', value: total_discount+franchise_discount_amount+roundoff, raw: total_discount+franchise_discount_amount+roundoff },
             { name: 'GST', value: `${fCurrency(final_total * 0.03)}(3%)`, raw: final_total*0.03 },
             { name: 'Total', value: fCurrency(final_total + final_total * 0.03), styles: styles.h4, raw: final_total },
           ].map((item) => (

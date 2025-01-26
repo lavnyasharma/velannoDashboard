@@ -76,65 +76,72 @@ export const navData = [
       //     { title: 'Account', path: paths.dashboard.user.account },
       //   ],
       // },
-      
+
       /**
        * Management
        */
-     
-          {
-            title: 'Product',
-            path: paths.dashboard.product.root,
-            icon: ICONS.product,
-            children: [
-              { title: 'List', path: paths.dashboard.product.root, roles: ['admin','counter'] },
-              { title: 'Details', path: paths.dashboard.product.demo.details, roles: ['admin'] },
-              { title: 'Create', path: paths.dashboard.product.new ,roles: ['admin']},
-              { title: 'Edit', path: paths.dashboard.product.demo.edit ,roles: ['admin']},
-    
-            ],
-            roles: ['admin', 'counter'],
-          },
-          {
-            title: 'Order',
-            path: paths.dashboard.order.root,
-            icon: ICONS.order,
-            children: [
-              { title: 'List', path: paths.dashboard.order.root, roles: ['admin', 'counter'] },
-            ],
-            roles: ['admin', 'counter'],
-          },
-          {
-            title: 'Billing',
-            path: paths.dashboard.search.root,
-            icon: ICONS.invoice,
-            roles: ['admin',"counter"],
-          },
-          {
-            title: 'Reports',
-            path: paths.dashboard.reports.root,
-            icon: ICONS.file,
-            children: [
-              { title: 'inventory', path: paths.dashboard.reports.root, roles: ['admin', 'counter'] },
-              { title: 'orders', path: paths.dashboard.reports.orders, roles: ['admin', 'counter'] },
 
-            ],
-            roles: ['admin',"counter"],
-          },
-          
-          {
-            title: 'Dispatch',
-            path: paths.dashboard.dispatch.bulk,
-            icon: ICONS.ecommerce,
-            children: [
-              { title: 'Select', path: paths.dashboard.dispatch.select, roles: ['admin'] },
-              { title: 'Bulk', path: paths.dashboard.dispatch.bulk, roles: ['admin',] },
-             
-            ],
-           
-            roles: ['admin'],
-          },
-        
-      
+      {
+        title: 'Product',
+        path: paths.dashboard.product.root,
+        icon: ICONS.product,
+        children: [
+          { title: 'List', path: paths.dashboard.product.root, roles: ['admin', 'counter'] },
+          { title: 'Details', path: paths.dashboard.product.demo.details, roles: ['admin'] },
+          { title: 'Create', path: paths.dashboard.product.new, roles: ['admin'] },
+          { title: 'Edit', path: paths.dashboard.product.demo.edit, roles: ['admin'] },
+
+        ],
+        roles: ['admin', 'counter'],
+      },
+      {
+        title: 'Order',
+        path: paths.dashboard.order.root,
+        icon: ICONS.order,
+        children: [
+          { title: 'List', path: paths.dashboard.order.root, roles: ['admin', 'counter'] },
+        ],
+        roles: ['admin', 'counter'],
+      },
+      {
+        title: 'Billing',
+        path: paths.dashboard.search.root,
+        icon: ICONS.invoice,
+        roles: ['admin', "counter"],
+      },
+      {
+        title: 'Reports',
+        path: paths.dashboard.reports.root,
+        icon: ICONS.file,
+        children: [
+          { title: 'inventory', path: paths.dashboard.reports.root, roles: ['admin', 'counter'] },
+          { title: 'orders', path: paths.dashboard.reports.orders, roles: ['admin', 'counter'] },
+
+        ],
+        roles: ['admin', "counter"],
+      },
+
+      {
+        title: 'Dispatch',
+        path: paths.dashboard.dispatch.bulk,
+        icon: ICONS.ecommerce,
+        children: [
+          { title: 'Select', path: paths.dashboard.dispatch.select, roles: ['admin'] },
+          { title: 'Bulk', path: paths.dashboard.dispatch.bulk, roles: ['admin',] },
+
+        ],
+
+        roles: ['admin'],
+      },
+      {
+        title: 'Kitty', 
+        path: paths.dashboard.kitty.root,
+        children: [
+          { title: 'List', path: paths.dashboard.kitty.list, roles: ['admin'] },
+          { title: 'Add', path: paths.dashboard.kitty.add, roles: ['admin',] },
+        ], icon: ICONS.kanban
+      },
+
       // {
       //   title: 'Invoice',
       //   path: paths.dashboard.invoice.root,

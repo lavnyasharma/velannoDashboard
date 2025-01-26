@@ -25,7 +25,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { DashboardContent } from 'src/layouts/dashboard';
 import { useTheme } from '@emotion/react';
-import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Divider, Grid, Stack, TextField, Typography } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ProductsAnalytic } from '../product-analytics';
 import { RenderCellMaterialProduct, RenderCellProduct } from '../product-table-row';
@@ -40,6 +40,7 @@ import SummaryCard from '../components/tab';
 // API details
 const API_URL = '/list-product/user/';
 const API_URL_SUMMARY = '/product/summary/seller/';
+const API_COUNTERS_URL = '/list/counter/';
 
 
 // ----------------------------------------------------------------------
@@ -64,7 +65,49 @@ export function ProductListView() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [sortModel, setSortModel] = useState([{ field: 'price', sort: 'asc' }]); // Default sorting
   const [filterQuantity, setFilterQuantity] = useState('all'); // State for filter quantity
+  const [selectedcounter, setSelectedcounter] = useState(0);
+  const [selectedcategory, setSelectedcategory] = useState(0);
+  const [silverselect, setSilverselect] = useState(0);
 
+
+const [categoriesOptions, setCategoriesOptions] = useState([]);
+  useEffect(() => {
+    if (localStorage.getItem('role') !== 'admin') return;
+    const fetchCounters = async () => {
+      try {
+        const response = await axiosInstance.get("/category/");
+        const categories = response.data.results.map((category) => ({
+          label: category.name,
+          id: category.id,
+        }));
+        console.log(categories)
+        setCategoriesOptions(categories);
+      } catch (error) {
+        console.error('Error fetching counters:', error);
+      }
+    };
+
+    fetchCounters();
+  }, []);
+
+  const [counterOptions, setCounterOptions] = useState([]);
+  useEffect(() => {
+    if (localStorage.getItem('role') !== 'admin') return;
+    const fetchCounters = async () => {
+      try {
+        const response = await axiosInstance.get(API_COUNTERS_URL);
+        const counters = response.data.map((counter) => ({
+          label: counter.user.username,
+          id: counter.user.id,
+        }));
+        setCounterOptions(counters);
+      } catch (error) {
+        console.error('Error fetching counters:', error);
+      }
+    };
+
+    fetchCounters();
+  }, []);
   // Fetch products from API
   const fetchProducts = useCallback(async (page = 1, pageSize = 10) => {
     setLoading(true);
@@ -78,7 +121,10 @@ export function ProductListView() {
           ordering,
           limit: pageSize,
           offset,
-          qf: filterQuantity, // Pass the filter quantity as a query parameter
+          qf: filterQuantity,
+          category: selectedcategory,
+          seller_id: selectedcounter,
+          silver_select: silverselect
         },
         headers: {
           accept: 'application/json',
@@ -93,7 +139,7 @@ export function ProductListView() {
     } finally {
       setLoading(false);
     }
-  }, [sortModel, filterQuantity]); // Add filterQuantity as a dependency
+  }, [sortModel, filterQuantity,selectedcategory,selectedcounter,silverselect]); // Add filterQuantity as a dependency
 
 
   const fetchSummary = async () => {
@@ -302,8 +348,9 @@ export function ProductListView() {
         </Card> : <Stack direction="row" justifyContent="center" alignItems="center" sx={{ minHeight: 200 }}>
           <CircularProgress />
         </Stack>}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Select
-
+          label="Filter Quantity"
           value={filterQuantity}
           onChange={handleFilterChange}
           variant="outlined"
@@ -313,6 +360,59 @@ export function ProductListView() {
           <MenuItem value="available">Available</MenuItem>
           <MenuItem value="sold">Sold</MenuItem>
         </Select>
+        {localStorage.getItem('role') === 'admin' &&
+          <TextField
+            select
+            label="Counter"
+            value={selectedcounter}
+            onChange={(e) => setSelectedcounter(Number(e.target.value))}
+            sx={{ width: 150 }}
+          >
+            <MenuItem value={0}>
+              All
+            </MenuItem>
+            {counterOptions && counterOptions.map((item, i) => (
+              <MenuItem key={i} value={item.id}>
+                {item.label}
+              </MenuItem>
+            ))}
+          </TextField>}
+          {localStorage.getItem('role') === 'admin' &&
+          <TextField
+            select
+            label="Categories"
+            value={selectedcategory}
+            onChange={(e) => setSelectedcategory(Number(e.target.value))}
+            sx={{ width: 150 }}
+          >
+            <MenuItem value={0}>
+              All
+            </MenuItem>
+            {categoriesOptions && categoriesOptions.map((item, i) => (
+              <MenuItem style={{textTransform:"capitalize"}} key={i} value={item.id}>
+                {item.label}
+              </MenuItem>
+            ))}
+          </TextField>}
+          {localStorage.getItem('role') === 'admin' &&
+          <TextField
+            select
+            label="Material"
+            value={silverselect}
+            onChange={(e) => setSilverselect(Number(e.target.value))}
+            sx={{ width: 150 }}
+          >
+            <MenuItem value={-1}>
+              All
+            </MenuItem>
+            <MenuItem value={0}>
+              silver
+            </MenuItem>
+            <MenuItem value={1}>
+              diamond
+            </MenuItem>
+          </TextField>}
+          </Box>
         <Card
           sx={{
 

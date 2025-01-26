@@ -143,7 +143,6 @@ export const paths = {
     reports: {
       root: `${ROOTS.DASHBOARD}/reports/inventory`,
       orders: `${ROOTS.DASHBOARD}/reports/orders`,
-     
     },
     dispatch:{
       bulk: `${ROOTS.DASHBOARD}/dispatch/bulk`,
@@ -154,6 +153,12 @@ export const paths = {
     },
     orderinvoice: {
       root: `${ROOTS.DASHBOARD}/invoice`,
+    },
+    kitty: {
+      root: `${ROOTS.DASHBOARD}/kitty`,
+      list: `${ROOTS.DASHBOARD}/kitty/list`,
+      add : `${ROOTS.DASHBOARD}/kitty/add`,
+      details: (id) => `${ROOTS.DASHBOARD}/kitty/${id}`,
     },
     
    
