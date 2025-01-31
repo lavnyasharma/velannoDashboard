@@ -70,7 +70,7 @@ const useStyles = () =>
 
 // ----------------------------------------------------------------------
 
-export function InvoicePDF({ invoice }) {
+export function InvoicePDF({ invoice,applyGst}) {
   const {
     order_number,
     customer,
@@ -112,13 +112,13 @@ export function InvoicePDF({ invoice }) {
   const renderInfo = (
     <View style={[styles.container]}>
       <View style={{ width: '50%' }}>
-        <Text style={[styles.subtitle2, styles.mb4]}>Invoice from</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>{applyGst?"Invoice from":"Estimate from"}</Text>
         <Text style={styles.body2}>Velonna.co</Text>
         <Text style={styles.body2}>info@velonna.co</Text>
       </View>
 
       <View style={{ width: '50%' }}>
-        <Text style={[styles.subtitle2, styles.mb4]}>Invoice to</Text>
+        <Text style={[styles.subtitle2, styles.mb4]}>{applyGst?"Invoice to":"Estimate to"}</Text>
         <Text style={styles.body2}>{customer ? customer.name : cname}</Text>
         <Text style={styles.body2}>{customer ? customer.phone : phone}</Text>
         <Text style={styles.body2}>{customer ? customer.email : email}</Text>
@@ -196,8 +196,8 @@ export function InvoicePDF({ invoice }) {
           {[
             { name: 'Subtotal', value: fCurrency(total), raw: total },
             { name: 'Discount', value: total_discount+franchise_discount_amount+roundoff, raw: total_discount+franchise_discount_amount+roundoff },
-            { name: 'GST', value: `${fCurrency(final_total * 0.03)}(3%)`, raw: final_total*0.03 },
-            { name: 'Total', value: fCurrency(final_total + final_total * 0.03), styles: styles.h4, raw: final_total },
+            { name: 'GST', value: applyGst?`${fCurrency(final_total * 0.03)}(3%)`:"0%", raw: final_total*0.03 },
+            { name: 'Total', value: applyGst?fCurrency(final_total + final_total * 0.03):fCurrency(final_total), styles: styles.h4, raw: final_total },
           ].map((item) => (
             item.raw !== 0 && <View key={item.name} style={[styles.row, styles.noBorder]}>
               <View style={styles.cell_1} />

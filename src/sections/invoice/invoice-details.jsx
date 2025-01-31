@@ -37,6 +37,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export function InvoiceDetails({ invoice }) {
+  const [applyGst, setApplyGst] = useState(true)
   const [currentStatus, setCurrentStatus] = useState(invoice?.status);
   console.log(invoice)
   const handleChangeStatus = useCallback((event) => {
@@ -73,18 +74,18 @@ export function InvoiceDetails({ invoice }) {
           {`-${fCurrency(invoice.roundoff)}`}
         </TableCell>
       </StyledTableRow>}
-      <StyledTableRow>
+      {applyGst && <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ color: 'text.secondary' }}>GST(3%)</TableCell>
         <TableCell width={120} sx={{ typography: 'body2' }}>
           {`${fCurrency(invoice.final_total * 0.03)}`}
         </TableCell>
-      </StyledTableRow>
+      </StyledTableRow>}
       <StyledTableRow>
         <TableCell colSpan={3} />
         <TableCell sx={{ typography: 'subtitle1' }}>Final Total</TableCell>
         <TableCell width={140} sx={{ typography: 'subtitle1' }}>
-          {fCurrency(invoice.final_total + invoice.final_total * 0.03)}
+          {applyGst ? fCurrency(invoice.final_total + invoice.final_total * 0.03) : fCurrency(invoice.final_total)}
         </TableCell>
       </StyledTableRow>
     </>
@@ -158,6 +159,8 @@ export function InvoiceDetails({ invoice }) {
   return (
     <>
       <InvoiceToolbar
+        setApplyGst={setApplyGst}
+        applyGst={applyGst}
         invoice={invoice}
         currentStatus={currentStatus || ''}
         onChangeStatus={handleChangeStatus}

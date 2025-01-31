@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PDFViewer, PDFDownloadLink, pdf } from '@react-pdf/renderer';
 
 import Box from '@mui/material/Box';
@@ -27,7 +27,7 @@ import { InvoicePDF } from './invoice-pdf';
 
 // ----------------------------------------------------------------------
 
-export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus }) {
+export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChangeStatus, setApplyGst, applyGst }) {
   const router = useRouter();
   const confirm = useBoolean();
   const view = useBoolean();
@@ -35,6 +35,17 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
   const handleEdit = useCallback(() => {
     router.push(paths.dashboard.invoice.edit(`${invoice?.id}`));
   }, [invoice?.id, router]);
+  const [blobData, setBlobData] = useState(null)
+
+  useEffect(() => {
+    const generateBlob = async () => {
+      const res = await pdf(<InvoicePDF invoice={invoice} applyGst={applyGst} />).toBlob();
+      setBlobData(res); // Set the resolved blob directly
+    };
+  
+    generateBlob(); // Call the function
+  
+  }, [applyGst, invoice]); // Dependencies
 
 
   const closeOrder = async () => {
@@ -60,9 +71,9 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
   const handlePrint = useCallback(async () => {
 
     if (!invoice) return;
-
+    console.log(blobData)
     // Generate PDF blob
-    const blob = await pdf(<InvoicePDF invoice={invoice} />).toBlob();
+    const blob = blobData === null ? await pdf(<InvoicePDF invoice={invoice} applyGst={applyGst} />).toBlob() : blobData;
     const url = URL.createObjectURL(blob);
 
     // Create a temporary iframe for printing
@@ -78,7 +89,7 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
       iframe.contentWindow.print();
 
     };
-  }, [invoice]);
+  }, [invoice, applyGst, blobData]);
   const renderDownload = (
     <NoSsr>
       <PDFDownloadLink
@@ -148,6 +159,15 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
               <Iconify icon="solar:printer-minimalistic-bold" />
             </IconButton>
           </Tooltip>
+          <Tooltip title="tax">
+            <IconButton
+              onClick={() => {
+                setApplyGst(!applyGst)
+              }}
+            >
+              <Iconify style={{ color: applyGst ? "" : "red" }} icon="tabler:receipt-tax" />
+            </IconButton>
+          </Tooltip>
 
           {/* <Tooltip title="Send">
             <IconButton>
@@ -160,6 +180,7 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
               <Iconify icon="solar:share-bold" />
             </IconButton>
           </Tooltip> */}
+
         </Stack>
 
         <TextField
