@@ -93,7 +93,7 @@ export function InvoiceToolbar({ invoice, currentStatus, statusOptions, onChange
   const renderDownload = (
     <NoSsr>
       <PDFDownloadLink
-        document={invoice ? <InvoicePDF invoice={invoice} /> : <span />}
+        document={invoice ? <InvoicePDF invoice={invoice} applyGst={applyGst} /> : <span />}
         fileName={invoice?.invoiceNumber}
         style={{ textDecoration: 'none' }}
       >
